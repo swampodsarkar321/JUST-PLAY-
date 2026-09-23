@@ -68,11 +68,13 @@ saveCoins();draw();
 function tiles(){const s=SYS[SIDS[SI]];return s.games.map((g,i)=>({sys:SIDS[SI],i,name:g[0],cat:g[1],color:s.color}));}
 function draw(){
   const s=SYS[SIDS[SI]];
-  bg.style.background=`radial-gradient(900px 500px at 70% 15%,${s.color}55,transparent),radial-gradient(700px 500px at 20% 90%,rgba(120,40,180,.25),transparent)`;
+  const T=tiles(),cur=T[GI]||T[0];
+  bg.style.background=`linear-gradient(115deg,${s.color}66 0%,transparent 55%),radial-gradient(900px 500px at 75% 10%,${s.color}44,transparent),radial-gradient(700px 500px at 15% 95%,rgba(0,112,209,.3),transparent),#0b0e1a`;
   sysname.innerText=s.name;
   const T=tiles(),cur=T[GI]||T[0];GI=T.indexOf(cur);if(GI<0)GI=0;
   gname.innerText=T[GI]?T[GI].name:'';
-  row.innerHTML=T.map((t,i)=>`<button onclick="sel(${i})" ondblclick="play()" id="t${i}" class="tile shrink-0 w-36 md:w-48 text-left rounded-2xl overflow-hidden border-2 ${i===GI?'sel border-white':'border-transparent opacity-70'}"><div class="h-36 md:h-48 grid place-items-center text-6xl" style="background:linear-gradient(150deg,${t.color},#0b1020)">${ARTS[(SI*4+i)%ARTS.length]}</div><div class="p-2 bg-black/60 text-xs font-bold truncate">${t.name}</div></button>`).join('')
+  row.innerHTML=T.map((t,i)=>{const g1=t.color,g2='#0b1020';
+  return `<button onclick="sel(${i})" ondblclick="play()" id="t${i}" class="tile shrink-0 w-52 md:w-72 text-left rounded-xl overflow-hidden border-2 ${i===GI?'sel border-white':'border-transparent opacity-60'}"><div class="h-28 md:h-40 relative" style="background:linear-gradient(120deg,${g1},${g2})"><span class="absolute inset-0 grid place-items-center font-black text-5xl md:text-7xl tracking-tighter" style="color:rgba(255,255,255,.9);text-shadow:0 6px 30px rgba(0,0,0,.5)">${t.name.split(' ').map(w=>w[0]).slice(0,2).join('')}</span><span class="absolute bottom-1.5 left-2 text-[10px] opacity-70">${t.cat}</span></div></button>`;}).join('')
   +`<button onclick="upload()" class="tile shrink-0 w-36 md:w-48 rounded-2xl border-2 border-dashed border-white/25 grid place-items-center h-[228px] md:h-[276px] opacity-70"><span class="text-center text-xs">+<br>My ROM</span></button>`;
   const el=document.getElementById('t'+GI);if(el)el.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'});
 }
