@@ -1,6 +1,7 @@
 <!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>VaultOS — Retro Gaming OS</title>
 <script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@700;800&display=swap">
 <style>html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif}
 body{background:url('https://images.unsplash.com/photo-1620121692029-d088224ddc74?w=1600&q=60') center/cover,#0b1020}
@@ -39,22 +40,23 @@ h1,.sora{font-family:'Sora',sans-serif}
 <button onclick="openSys('gba');hideCtx()" class="w-full text-left px-3 py-2 rounded-lg hover:bg-white/10">🎮 Open GBA</button></div>
 <script>
 const SYSTEMS=[
-{id:'gba',name:'GBA',icon:'🎮',core:'gba',color:'#a855f7',games:[['Pokemon Emerald','RPG'],['Mario Kart SC','Racing'],['Zelda Minish Cap','Adventure'],['Metroid Fusion','Action']]},
-{id:'gbc',name:'Game Boy',icon:'🕹️',core:'gb',color:'#22d3ee',games:[['Pokemon Crystal','RPG'],['Zelda Links Awakening','Adventure'],['Tetris','Puzzle'],['Mario Land 2','Platformer']]},
-{id:'nes',name:'NES',icon:'👾',core:'nes',color:'#ef4444',games:[['Mario Bros 3','Platformer'],['Contra','Action'],['Zelda','Adventure'],['Tetris','Puzzle']]},
-{id:'snes',name:'SNES',icon:'🌟',core:'snes',color:'#f59e0b',games:[['Mario World','Platformer'],['Zelda LTTP','Adventure'],['Donkey Kong','Platformer'],['Street Fighter','Fighting']]},
-{id:'gen',name:'Genesis',icon:'🌀',core:'segaMD',color:'#34d399',games:[['Sonic 2','Platformer'],['Streets of Rage','Action'],['Mortal Kombat','Fighting'],['Aladdin','Platformer']]}];
+{id:'gba',name:'GBA',icon:'gamepad-2',core:'gba',color:'#a855f7',games:[['Pokemon Emerald','RPG'],['Mario Kart SC','Racing'],['Zelda Minish Cap','Adventure'],['Metroid Fusion','Action']]},
+{id:'gbc',name:'Game Boy',icon:'joystick',core:'gb',color:'#22d3ee',games:[['Pokemon Crystal','RPG'],['Zelda Links Awakening','Adventure'],['Tetris','Puzzle'],['Mario Land 2','Platformer']]},
+{id:'nes',name:'NES',icon:'ghost',core:'nes',color:'#ef4444',games:[['Mario Bros 3','Platformer'],['Contra','Action'],['Zelda','Adventure'],['Tetris','Puzzle']]},
+{id:'snes',name:'SNES',icon:'star',core:'snes',color:'#f59e0b',games:[['Mario World','Platformer'],['Zelda LTTP','Adventure'],['Donkey Kong','Platformer'],['Street Fighter','Fighting']]},
+{id:'gen',name:'Genesis',icon:'orbit',core:'segaMD',color:'#34d399',games:[['Sonic 2','Platformer'],['Streets of Rage','Action'],['Mortal Kombat','Fighting'],['Aladdin','Platformer']]}];
 const ROMS={}; // 'gba:0':'https://.../emerald.gba' — ROM links ekhane
 let coins=+(localStorage.getItem('vo_coins')||100),ZW=0;
 setTimeout(()=>{boot.style.opacity=0;setTimeout(()=>boot.remove(),650);},1400);
 setInterval(()=>{clock.innerText=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});coinsEl();},1000);
 function coinsEl(){document.getElementById('coins').innerHTML='🪙 '+coins;}
-desk.innerHTML=SYSTEMS.map(s=>`<div class="dicon" ondblclick="openSys('${s.id}')" onclick="openSys('${s.id}')"><div class="text-4xl mb-1">${s.icon}</div><div class="text-[11px] font-semibold drop-shadow">${s.name}</div></div>`).join('')+`<div class="dicon" onclick="upload()"><div class="text-4xl mb-1">📥</div><div class="text-[11px] font-semibold drop-shadow">My ROM</div></div><input id="up" type="file" class="hidden">`;
-sapps.innerHTML=SYSTEMS.map(s=>`<button onclick="openSys('${s.id}')" class="sapp rounded-xl p-3 text-center"><div class="text-3xl">${s.icon}</div><div class="text-[11px] mt-1">${s.name}</div></button>`).join('');
+desk.innerHTML=SYSTEMS.map(s=>`<div class="dicon" onclick="openSys('${s.id}')"><div class="mx-auto w-12 h-12 rounded-2xl grid place-items-center mb-1" style="background:${s.color}33;border:1px solid ${s.color}66"><i data-lucide="${s.icon}" class="w-6 h-6" style="color:${s.color}"></i></div><div class="text-[11px] font-semibold drop-shadow">${s.name}</div></div>`).join('')+`<div class="dicon" onclick="upload()"><div class="mx-auto w-12 h-12 rounded-2xl grid place-items-center mb-1 bg-white/10 border border-white/20"><i data-lucide="upload" class="w-6 h-6"></i></div><div class="text-[11px] font-semibold drop-shadow">My ROM</div></div><input id="up" type="file" class="hidden">`;
+sapps.innerHTML=SYSTEMS.map(s=>`<button onclick="openSys('${s.id}')" class="sapp rounded-xl p-3 text-center"><i data-lucide="${s.icon}" class="w-7 h-7 mx-auto" style="color:${s.color}"></i><div class="text-[11px] mt-1">${s.name}</div></button>`).join('');
+lucide.createIcons();
 function upload(){up.click();up.onchange=e=>{const f=e.target.files[0];if(!f)return;openGame('custom',f.name,URL.createObjectURL(f),'gb');};}
 function openSys(id){const s=SYSTEMS.find(x=>x.id===id);
 sgames.innerHTML=s.games.map((g,i)=>`<button onclick="openGame('${id}:${i}','${g[0]}')" class="w-full text-left px-3 py-2 rounded-xl hover:bg-white/10 text-sm">🎯 ${g[0]} <span class="opacity-50 text-xs">• ${g[1]}</span></button>`).join('')+`<div class="text-[11px] opacity-50 px-3 py-1">ROM links not set — upload your own, or add URLs in ROMS{}</div>`;
-startmenu.classList.remove('hidden');}
+startmenu.classList.remove('hidden');lucide.createIcons();}
 function openGame(key,name,customUrl,customCore){
   startmenu.classList.add('hidden');
   const [sys,gi]=key.includes(':')?key.split(':'):[customCore||'gba',-1];
@@ -64,12 +66,12 @@ function openGame(key,name,customUrl,customCore){
   const w=document.createElement('div');w.id=id;w.className='win';
   w.style.cssText=`left:${40+ZW*28}px;top:${30+ZW*24}px;width:min(640px,94vw);height:min(520px,72vh);z-index:${20+ZW}`;
   w.innerHTML=`<div class="wtitle flex items-center gap-2 px-3 py-2 text-xs font-semibold" style="background:rgba(255,255,255,.06)">
-  <span>${S.icon}</span><span class="truncate">${name} — ${S.name}</span>
+  <i data-lucide="${S.icon}" class="w-4 h-4" style="color:${S.color}"></i><span class="truncate">${name} — ${S.name}</span>
   <span class="ml-auto flex gap-1.5"><button onclick="minWin('${id}')" class="w-7 h-6 rounded-md bg-white/10 text-xs">–</button><button onclick="maxWin('${id}')" class="w-7 h-6 rounded-md bg-white/10 text-xs">▢</button><button onclick="closeWin('${id}')" class="w-7 h-6 rounded-md bg-red-500/80 text-xs">✕</button></span></div>
   <div class="flex-1 bg-black relative" id="${id}body"></div>
   <div class="text-[10px] px-3 py-1 opacity-50">30 min free session • coins: <span class="c2">${coins}</span></div>`;
   wins.appendChild(w);tasks.innerHTML+=`<button id="t-${id}" onclick="focusWin('${id}')" class="tbtn text-xs bg-white/10 rounded-lg px-3 py-1.5 truncate max-w-[140px]">${name}</button>`;
-  drag(w);
+  lucide.createIcons();drag(w);
   const body=document.getElementById(id+'body');
   if(!romUrl){body.innerHTML=`<div class="grid place-items-center h-full text-center text-sm opacity-70 p-6">No ROM linked.<br>Upload your own file, or add URL in <b>ROMS['${key}']</b>.</div>`;return;}
   const f=document.createElement('iframe');f.className='w-full h-full border-0';
