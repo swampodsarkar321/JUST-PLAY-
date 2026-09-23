@@ -1,0 +1,102 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Play — Nokia Vault</title>
+<script src="https://cdn.tailwindcss.com"></script></head>
+<body class="bg-[#060a13] text-slate-100 min-h-screen">
+<header class="flex items-center gap-3 px-4 py-3 border-b border-white/5"><a href="index.html" class="text-sm opacity-70">← Library</a>
+<div class="ml-auto flex items-center gap-3 text-sm"><span id="timer" class="bg-sky-500/15 border border-sky-500/30 rounded-full px-3 py-1">30:00 free</span><span class="bg-amber-400/10 border border-amber-400/30 rounded-full px-3 py-1">🪙 <b id="coins">0</b></span></div></header>
+<main class="p-4 max-w-4xl mx-auto space-y-4">
+<div class="mx-auto rounded-[3rem] p-4 pt-5" style="max-width:440px;background:linear-gradient(165deg,#3a4763,#141b30 60%,#0a0e1c);border:1px solid rgba(255,255,255,.14);box-shadow:0 40px 100px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.15)">
+<div class="flex items-center justify-center gap-2 mb-3"><div class="w-16 h-1.5 rounded-full bg-black/60"></div></div>
+<div class="text-center text-[10px] tracking-[.35em] opacity-50 mb-2">NOKIA</div>
+<div class="rounded-[1.4rem] overflow-hidden bg-black border-4 border-black" style="box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)">
+<!-- Win11-style window chrome -->
+<div class="flex items-center gap-2 px-3 py-1.5 text-[11px]" style="background:rgba(32,38,55,.92);backdrop-filter:blur(20px)">
+<span class="flex gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-[#ff5f57]"></span><span class="w-2.5 h-2.5 rounded-full bg-[#febc2e]"></span><span class="w-2.5 h-2.5 rounded-full bg-[#28c840]"></span></span>
+<span class="opacity-80 truncate">🎮 <span id="gname">Game</span> — Nokia Vault</span></div>
+<div id="screen" class="grid place-items-center bg-black" style="aspect-ratio:3/4;min-height:400px">
+<iframe id="emu" class="hidden w-full h-full border-0" style="aspect-ratio:3/4;min-height:400px" allow="autoplay"></iframe>
+<div id="emufallback" class="text-center opacity-60 text-sm px-6"><div class="text-5xl mb-3">📱</div>
+<div>Emulator engine not deployed yet.<br><span class="text-xs">See ENGINE.md — build freej2me-web, set ENGINE_BASE below.</span></div></div>
+</div>
+<!-- Win11 taskbar -->
+<div class="flex items-center gap-3 px-3 py-1.5 text-[11px]" style="background:rgba(32,38,55,.92);backdrop-filter:blur(20px)">
+<span class="grid place-items-center w-6 h-6 rounded-md bg-white/10">▦</span>
+<span class="opacity-70 hidden sm:inline">🔍 Search</span>
+<span class="opacity-70">🎮 Vault</span>
+<span id="clock" class="ml-auto opacity-80 tabular-nums">--:--</span></div>
+</div>
+<!-- Nokia nav + keypad (touch + click, sends keys to emulator) -->
+<div class="mt-3 space-y-2 select-none" style="touch-action:manipulation">
+<div class="grid grid-cols-3 gap-2 text-center">
+<button data-k="q" class="nk rounded-full py-2 text-xs font-bold">—</button>
+<button data-k="ArrowUp" class="nk rounded-full py-2 text-xs font-bold">▲</button>
+<button data-k="w" class="nk rounded-full py-2 text-xs font-bold">—</button>
+<button data-k="ArrowLeft" class="nk rounded-full py-2 text-xs font-bold">◀</button>
+<button data-k="Enter" class="nk rounded-full py-2 text-xs font-bold" style="background:linear-gradient(135deg,#34d399,#22d3ee);color:#06281c">●</button>
+<button data-k="ArrowRight" class="nk rounded-full py-2 text-xs font-bold">▶</button>
+<button data-k="Escape" class="nk rounded-full py-2 text-[11px]">📞</button>
+<button data-k="ArrowDown" class="nk rounded-full py-2 text-xs font-bold">▼</button>
+<button data-k="e" class="nk rounded-full py-2 text-[11px]">📵</button>
+</div>
+<div class="grid grid-cols-3 gap-2 text-center text-xs">
+<button data-k="1" class="nk rounded-2xl py-2.5">1<small class="opacity-50"> </small></button><button data-k="2" class="nk rounded-2xl py-2.5">2<small class="opacity-50"> abc</small></button><button data-k="3" class="nk rounded-2xl py-2.5">3<small class="opacity-50"> def</small></button>
+<button data-k="4" class="nk rounded-2xl py-2.5">4<small class="opacity-50"> ghi</small></button><button data-k="5" class="nk rounded-2xl py-2.5">5<small class="opacity-50"> jkl</small></button><button data-k="6" class="nk rounded-2xl py-2.5">6<small class="opacity-50"> mno</small></button>
+<button data-k="7" class="nk rounded-2xl py-2.5">7<small class="opacity-50"> pqrs</small></button><button data-k="8" class="nk rounded-2xl py-2.5">8<small class="opacity-50"> tuv</small></button><button data-k="9" class="nk rounded-2xl py-2.5">9<small class="opacity-50"> wxyz</small></button>
+<button data-k="*" class="nk rounded-2xl py-2.5">*</button><button data-k="0" class="nk rounded-2xl py-2.5">0<small class="opacity-50"> +</small></button><button data-k="#" class="nk rounded-2xl py-2.5">#</button>
+</div></div>
+<style>.nk{background:linear-gradient(180deg,rgba(255,255,255,.12),rgba(255,255,255,.03));border:1px solid rgba(255,255,255,.1);box-shadow:0 2px 6px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.12);color:#e2e8f0}.nk:active{transform:translateY(1px);background:rgba(52,211,153,.3)}</style></div>
+<div id="lock" class="hidden rounded-3xl p-8 text-center bg-amber-400/10 border border-amber-400/30">
+<h2 class="text-xl font-bold">Free 30 min over!</h2><p class="text-sm opacity-70">Watch an ad for +30 coins (1 coin = 1 min) or continue.</p>
+<button onclick="earnPlay()" class="mt-3 bg-amber-400 text-slate-950 font-bold px-6 py-2.5 rounded-xl text-sm">Watch ad • +30 coins</button></div>
+</main>
+<script>
+/* ENGINE WIRE — build output er path ekhane bosan (ENGINE.md dekhen) */
+const ENGINE_BASE = './engine/run.html'; // e.g. 'https://yoursite.com/engine/run.html'
+let coins=+(localStorage.getItem('jv_coins')||100),secs=30*60;
+const q=new URLSearchParams(location.search);
+fetch('games.json').then(r=>r.json()).then(g=>{
+  const game=g[+q.get('g')];
+  document.getElementById('gname').innerText=q.get('custom')?(sessionStorage.getItem('jv_name')||'Custom JAR'):((game&&game.name)||'Game');
+  if(game){sessionStorage.setItem('jv_jar',game.jar);bootEmu(game.jar);}
+  if(q.get('custom')&&sessionStorage.getItem('jv_custom'))bootEmu(sessionStorage.getItem('jv_custom'));
+}).catch(()=>{});
+function bootEmu(jarUrl){
+  const f=document.getElementById('emu');
+  f.src=ENGINE_BASE+'?app='+encodeURIComponent(jarUrl);
+  f.classList.remove('hidden');
+  const fb=document.getElementById('emufallback');if(fb)fb.style.display='none';
+}
+if(q.get('custom'))document.getElementById('gname').innerText=sessionStorage.getItem('jv_name')||'Custom JAR';
+function paint(){document.getElementById('coins').innerText=coins;
+const m=String(Math.floor(secs/60)).padStart(2,'0'),s=String(secs%60).padStart(2,'0');
+document.getElementById('timer').innerText=secs>0?`${m}:${s} free`:'Coins play';
+document.getElementById('clock').innerText=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});}
+paint();
+setInterval(()=>{
+  if(secs>0){secs--;if(secs===0)document.getElementById('lock').classList.remove('hidden');}
+  else if(coins>0&&!document.getElementById('lock').classList.contains('hidden')===false){coins--;localStorage.setItem('jv_coins',coins);if(coins<=0)document.getElementById('lock').classList.remove('hidden');}
+  paint();
+},1000);
+function earnPlay(){coins+=30;localStorage.setItem('jv_coins',coins);secs=0;document.getElementById('lock').classList.add('hidden');paint();alert('+30 coins! (ad placeholder)');}
+/* Keypad + touchscreen: keys go to emulator (same-origin after deploy).
+   Cross-origin (other domain engine) hole physical keyboard use koren. */
+function sendKey(k,down){
+  const f=document.getElementById('emu');
+  try{
+    const doc=f.contentDocument;
+    if(doc){doc.dispatchEvent(new KeyboardEvent(down?'keydown':'keyup',{key:k,bubbles:true}));return;}
+  }catch(e){}
+  try{f.contentWindow.postMessage({type:'vault-key',key:k,down},'*');}catch(e){}
+  document.dispatchEvent(new KeyboardEvent(down?'keydown':'keyup',{key:k,bubbles:true}));
+}
+document.querySelectorAll('.nk').forEach(b=>{
+  const k=b.dataset.k;
+  const press=e=>{e.preventDefault();sendKey(k,true);setTimeout(()=>sendKey(k,false),120);};
+  b.addEventListener('pointerdown',press);
+});
+document.getElementById('screen').addEventListener('pointerdown',()=>{const f=document.getElementById('emu');try{f.contentWindow.focus();}catch(e){}});
+   1. git clone https://github.com/zb3/freej2me-web (docker build per README)
+   2. Host build output, point #screen iframe/div to it with ?jar=<url>
+   3. Custom upload: pass object URL of user JAR
+*/
+</script></body></html>

@@ -1,0 +1,51 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nokia Vault — Classic Java Games Arcade</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Sora:wght@700;800&family=Press+Start+2P&display=swap">
+<style>body{font-family:'Inter',sans-serif;background:#05070f}.pxf{font-family:'Press Start 2P',monospace}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+@keyframes glowp{0%,100%{opacity:.5}50%{opacity:1}}
+@keyframes marq{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.marq{animation:marq 22s linear infinite}
+.gcard{transition:transform .18s ease,box-shadow .18s ease}
+.gcard:hover{transform:translateY(-6px) scale(1.02);box-shadow:0 20px 50px rgba(52,211,153,.25)}
+.neon{text-shadow:0 0 18px rgba(52,211,153,.8),0 0 60px rgba(34,211,238,.5)}</style></head>
+<body class="text-slate-100 min-h-screen overflow-x-hidden">
+<div class="fixed -top-40 left-1/4 w-[500px] h-[500px] rounded-full bg-fuchsia-600/15 blur-[130px]"></div>
+<div class="fixed bottom-0 right-0 w-[400px] h-[400px] rounded-full bg-emerald-500/15 blur-[120px]"></div>
+<header class="flex items-center gap-3 px-4 md:px-8 py-4 sticky top-0 z-40 bg-black/50 backdrop-blur-xl border-b border-white/5">
+<div class="w-10 h-10 rounded-2xl grid place-items-center font-black text-slate-950 text-lg shadow-lg shadow-emerald-500/40" style="background:linear-gradient(135deg,#fbbf24,#34d399)">J</div>
+<div><h1 class="leading-none font-bold">Nokia Vault</h1><div class="text-[9px] tracking-[.3em] text-emerald-300/70">JAVA ARCADE</div></div>
+<input id="sq" oninput="draw()" placeholder="🔍 Search games..." class="ml-4 hidden md:block bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm w-56 outline-none focus:border-emerald-400">
+<div class="ml-auto flex items-center gap-2 text-sm bg-amber-400/10 border border-amber-400/30 rounded-full px-4 py-1.5">🪙 <b id="coins">0</b></div>
+<a href="player.html" class="text-sm text-slate-950 font-extrabold px-5 py-2.5 rounded-xl" style="background:linear-gradient(135deg,#34d399,#22d3ee)">▶ PLAY</a></header>
+<div class="overflow-hidden border-b border-white/5 bg-black/40"><div class="marq whitespace-nowrap py-2 text-xs tracking-widest opacity-70 inline-block">🕹️ 30 MIN FREE &nbsp;•&nbsp; 🪙 WATCH ADS, EARN COINS &nbsp;•&nbsp; 📱 NO INSTALL, PLAY IN BROWSER &nbsp;•&nbsp; 🎮 BOUNCE • PRINCE OF PERSIA • DIAMOND RUSH • ASPHALT &nbsp;•&nbsp; 🕹️ 30 MIN FREE &nbsp;•&nbsp; 🪙 WATCH ADS, EARN COINS &nbsp;•&nbsp; 📱 NO INSTALL &nbsp;•&nbsp;</div></div>
+<main class="p-4 md:p-8 max-w-6xl mx-auto space-y-8">
+<section class="rounded-[2rem] p-8 md:p-14 relative overflow-hidden" style="background:linear-gradient(130deg,#4c1d95,#0e7490 55%,#065f46)">
+<div class="absolute right-6 top-6 text-7xl md:text-9xl opacity-30" style="animation:floaty 4s ease-in-out infinite">📱</div>
+<div class="pxf text-[10px] md:text-xs text-emerald-300 mb-4" style="animation:glowp 2.5s infinite">● INSERT COIN</div>
+<h2 class="text-4xl md:text-6xl font-bold leading-tight">Play classics.<br><span class="neon text-emerald-300">Free 30 min.</span></h2>
+<p class="opacity-70 mt-3 text-sm md:text-base max-w-md">Legendary J2ME games, right in your browser. Run out? Watch a short ad, stack coins, keep the streak alive.</p>
+<div class="flex flex-wrap gap-3 mt-6"><a href="player.html" class="bg-white text-slate-950 font-extrabold px-8 py-3.5 rounded-2xl text-sm shadow-xl">▶ START PLAYING</a><button onclick="earn()" class="bg-black/40 border border-amber-300/40 px-8 py-3.5 rounded-2xl text-sm font-bold">🪙 +30 coins (ad)</button></div>
+<div class="flex gap-6 mt-6 text-xs opacity-70"><span><b class="text-white">50+</b> games</span><span><b class="text-white">120k</b> players</span><span><b class="text-white">4.9★</b> rated</span></div></section>
+<section><div class="flex items-center gap-2 mb-4"><h2 class="text-xl font-bold">🔥 Trending Now</h2><div class="flex gap-2 ml-auto" id="cats"></div></div>
+<div id="grid" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div></section>
+<section class="rounded-3xl p-6 border border-dashed border-white/15"><h2 class="text-lg font-bold mb-1">📥 Got your own .jar?</h2><p class="text-xs opacity-60 mb-3">File never leaves your browser. Pick & play instantly.</p><input id="up" type="file" accept=".jar" class="text-sm"></section>
+</main>
+<footer class="text-center text-xs opacity-40 py-8">Nokia Vault • fan arcade • bring-your-own-ROM friendly</footer>
+<script>
+const ARTS=['🏎️','🗡️','💎','🏁','⚽','⚔️','🧱','🐍'];
+const GRADS=[['#f59e0b','#ef4444'],['#8b5cf6','#ec4899'],['#22d3ee','#34d399'],['#f43f5e','#f59e0b'],['#34d399','#3b82f6'],['#a855f7','#6366f1'],['#14b8a6','#84cc16'],['#f97316','#eab308']];
+let ALL=[],CAT='All';
+let coins=+(localStorage.getItem('jv_coins')||100);
+document.getElementById('coins').innerText=coins;
+fetch('games.json').then(r=>r.json()).then(g=>{ALL=g;cats();draw();}).catch(()=>{grid.innerHTML='<div class="opacity-50 text-sm">games.json missing</div>';});
+function cats(){const c=['All',...new Set(ALL.map(g=>g.cat))];
+document.getElementById('cats').innerHTML=c.map(x=>`<button onclick="CAT='${x}';draw()" class="text-xs px-3 py-1.5 rounded-full ${CAT===x?'bg-emerald-400 text-slate-950 font-bold':'bg-white/5'}">${x}</button>`).join('');}
+function draw(){cats();const q=(document.getElementById('sq').value||'').toLowerCase();
+const f=ALL.filter(g=>(CAT==='All'||g.cat===CAT)&&g.name.toLowerCase().includes(q));
+grid.innerHTML=f.map(g=>{const i=ALL.indexOf(g),a=ARTS[i%ARTS.length],gr=GRADS[i%GRADS.length];
+return `<a href="player.html?g=${i}" class="gcard rounded-2xl overflow-hidden border border-white/10 bg-white/[.03]"><div class="h-28 grid place-items-center text-5xl" style="background:linear-gradient(135deg,${gr[0]},${gr[1]})">${a}</div><div class="p-3"><b class="text-sm">${g.name}</b><div class="text-[11px] opacity-50">${g.cat} • ${g.plays||''} plays</div></div></a>`;}).join('')||'<div class="opacity-50">No games found</div>';}
+function earn(){coins+=30;localStorage.setItem('jv_coins',coins);document.getElementById('coins').innerText=coins;alert('+30 coins! (ad placeholder)');}
+document.getElementById('up').onchange=e=>{const f=e.target.files[0];if(!f)return;sessionStorage.setItem('jv_custom',URL.createObjectURL(f));sessionStorage.setItem('jv_name',f.name);location.href='player.html?custom=1';};
+</script></body></html>
