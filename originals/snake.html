@@ -1,0 +1,47 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Neon Snake — Vault Originals</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>body{background:#05070f;font-family:sans-serif}canvas{box-shadow:0 0 60px rgba(52,211,153,.25)}</style></head>
+<body class="text-white min-h-screen grid place-items-center p-4">
+<div class="w-full max-w-[440px] space-y-3">
+<div class="flex items-center gap-2"><a href="../index.html" class="text-xs opacity-60">← VaultOS</a>
+<h1 class="font-bold">Neon Snake</h1><span class="ml-auto text-sm bg-amber-400/10 border border-amber-400/30 rounded-full px-3 py-1">🪙 <b id="coins">0</b></span></div>
+<div class="flex items-center gap-3 text-sm"><span>Score: <b id="sc">0</b></span><span class="opacity-50">Best: <b id="best">0</b></span></div>
+<canvas id="c" width="400" height="400" class="w-full rounded-2xl border border-emerald-400/30 bg-black"></canvas>
+<div class="grid grid-cols-3 gap-2 max-w-[220px] mx-auto text-center select-none">
+<div></div><button data-d="up" class="bg-white/10 rounded-xl py-2">▲</button><div></div>
+<button data-d="left" class="bg-white/10 rounded-xl py-2">◀</button><button data-d="down" class="bg-white/10 rounded-xl py-2">▼</button><button data-d="right" class="bg-white/10 rounded-xl py-2">▶</button></div>
+<p class="text-[11px] opacity-40 text-center">Arrow keys / swipe / buttons • every 100 pts = +10 coins</p></div>
+<script>
+const cv=document.getElementById('c'),x=cv.getContext('2d'),N=20,S=20;
+let sn,dir,nd,food,sc=0,over=false;
+let coins=+(localStorage.getItem('vo_coins')||100),best=+(localStorage.getItem('vs_best')||0);
+bestEl();coinsEl();
+function bestEl(){document.getElementById('best').innerText=best;}
+function coinsEl(){document.getElementById('coins').innerText=coins;}
+function reset(){sn=[[10,10],[9,10],[8,10]];dir='right';nd='right';sc=0;over=false;place();document.getElementById('sc').innerText=0;loop();}
+function place(){food=[Math.floor(Math.random()*N),Math.floor(Math.random()*N)];}
+function step(){
+  dir=nd;const h=[...sn[0]];
+  if(dir==='up')h[1]--;if(dir==='down')h[1]++;if(dir==='left')h[0]--;if(dir==='right')h[0]++;
+  if(h[0]<0||h[1]<0||h[0]>=N||h[1]>=N||sn.some(s=>s[0]===h[0]&&s[1]===h[1])){die();return;}
+  sn.unshift(h);
+  if(h[0]===food[0]&&h[1]===food[1]){sc+=10;document.getElementById('sc').innerText=sc;
+    if(sc>best){best=sc;localStorage.setItem('vs_best',best);bestEl();}
+    if(sc%100===0){coins+=10;localStorage.setItem('vo_coins',coins);coinsEl();}
+    place();}else sn.pop();
+  draw();
+}
+function draw(){x.fillStyle='#000';x.fillRect(0,0,400,400);
+  x.shadowBlur=12;x.shadowColor='#f43f5e';x.fillStyle='#f43f5e';x.fillRect(food[0]*S+3,food[1]*S+3,S-6,S-6);
+  x.shadowColor='#34d399';x.fillStyle='#34d399';sn.forEach((s,i)=>{x.globalAlpha=i?0.75:1;x.fillRect(s[0]*S+2,s[1]*S+2,S-4,S-4);});x.globalAlpha=1;x.shadowBlur=0;}
+function die(){over=true;setTimeout(()=>{alert('Game over! Score '+sc);reset();},300);}
+function loop(){if(!over){step();setTimeout(loop,110);}}
+document.addEventListener('keydown',e=>{const k=e.key;if(k==='ArrowUp'&&dir!=='down')nd='up';if(k==='ArrowDown'&&dir!=='up')nd='down';if(k==='ArrowLeft'&&dir!=='right')nd='left';if(k==='ArrowRight'&&dir!=='left')nd='right';});
+document.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{const d=b.dataset.d;if(d==='up'&&dir!=='down')nd='up';if(d==='down'&&dir!=='up')nd='down';if(d==='left'&&dir!=='right')nd='left';if(d==='right'&&dir!=='left')nd='right';});
+let tx=0,ty=0;cv.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY;},{passive:true});
+cv.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-tx,dy=e.changedTouches[0].clientY-ty;
+if(Math.abs(dx)>Math.abs(dy)){if(dx>0&&dir!=='left')nd='right';else if(dx<0&&dir!=='right')nd='left';}
+else{if(dy>0&&dir!=='up')nd='down';else if(dy<0&&dir!=='down')nd='up';}},{passive:true});
+reset();
+</script></body></html>
