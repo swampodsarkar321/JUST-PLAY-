@@ -15,11 +15,20 @@
 <p class="text-[11px] opacity-40">WASD move • Mouse aim • Click shoot • First to 5 or timer wins round</p></div></div>
 <div id="game" class="hidden min-h-screen flex-col items-center p-3 gap-2">
 <div class="w-full max-w-[860px] flex items-center gap-3 text-sm">
-<span id="hud" class="font-bold">0 : 0</span><span id="rtimer" class="opacity-70 tabular-nums">60</span>
+<span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-emerald-400"></span>YOU <b id="hs">0</b></span>
+<span id="pips" class="tracking-widest text-xs">○ ○ ○</span>
+<span id="rtimer" class="opacity-70 tabular-nums">60</span>
+<span id="pips2" class="tracking-widest text-xs">○ ○ ○</span>
+<span class="flex items-center gap-2"><b id="os">0</b> FOE<span class="w-3 h-3 rounded-full bg-red-400"></span></span>
 <span id="ping" class="opacity-50 text-xs ml-auto">-- ms</span>
 <button onclick="quit()" class="text-xs bg-red-500/20 text-red-300 px-3 py-1.5 rounded-lg">Quit</button></div>
+<div class="w-full max-w-[860px] grid grid-cols-2 gap-2 text-xs">
+<div>YOU HP <div class="h-2 rounded bg-white/10"><div id="hp1" class="h-2 rounded bg-emerald-400" style="width:100%"></div></div></div>
+<div>FOE HP <div class="h-2 rounded bg-white/10"><div id="hp2" class="h-2 rounded bg-red-400" style="width:100%"></div></div></div></div>
 <canvas id="c" width="840" height="520" class="w-full max-w-[860px] rounded-2xl border border-emerald-400/20"></canvas>
-<div id="msg" class="text-sm font-bold h-6"></div></div>
+<div class="w-full max-w-[860px] grid grid-cols-2 gap-2">
+<div id="feed" class="text-[11px] space-y-0.5 h-20 overflow-hidden opacity-90"></div>
+<div id="msg" class="text-sm font-bold text-right"></div></div></div>
 <script>
 firebase.initializeApp({databaseURL:"https://fram-and-go-default-rtdb.asia-southeast1.firebasedatabase.app"});
 const db=firebase.database();
@@ -73,9 +82,10 @@ function tick(t){
   S.x=Math.max(15,Math.min(825,S.x));S.y=Math.max(15,Math.min(505,S.y));
   if(shoot&&t-(S.cd||0)>220){S.cd=t;const s={x:S.x,y:S.y,a:Math.atan2(my-S.y,mx-S.x)};shots.push({...s,me:true});shoot=false;
     if(!host)db.ref('duel/'+room+'/gshots').push(s);}
-  shots=shots.filter(s=>{s.x+=Math.cos(s.a)*9*k;s.y+=Math.sin(s.a)*9*k;
+  shots=shots.filter(s=>{if(s.hx!==undefined)return Date.now()-s.t<300;
+    s.x+=Math.cos(s.a)*9*k;s.y+=Math.sin(s.a)*9*k;
     const T=host?o:p;
-    if(Math.hypot(s.x-T.x,s.y-T.y)<14){T.hp-=12;shots.push();return false;}
+    if(Math.hypot(s.x-T.x,s.y-T.y)<14){T.hp-=12;hitmark(s.x,s.y);feed(`hit -12 ${T.hp<=0?'<b>KILL</b>':''}`,s.me);return false;}
     return s.x>0&&s.x<840&&s.y>0&&s.y<520;});
   if(host){
     rt-=dt/1000;
@@ -87,15 +97,23 @@ function tick(t){
       p={x:100,y:260,hp:100};o={x:740,y:260,hp:100};rt=60;round++;
       setTimeout(()=>document.getElementById('msg').innerText='',2000);
     }
-    document.getElementById('hud').innerText=`${score[0]} : ${score[1]} • R${round}`;
+    document.getElementById('hs').innerText=score[0];document.getElementById('os').innerText=score[1];
+    document.getElementById('pips').innerText='●'.repeat(score[0])+'○'.repeat(Math.max(0,2-score[0]));
+    document.getElementById('pips2').innerText='●'.repeat(score[1])+'○'.repeat(Math.max(0,2-score[1]));
     document.getElementById('rtimer').innerText=Math.ceil(rt)+'s';
   }else{
-    document.getElementById('hud').innerText=`${score[0]} : ${score[1]} • R${round}`;
+    document.getElementById('hs').innerText=score[0];document.getElementById('os').innerText=score[1];
     document.getElementById('rtimer').innerText=Math.ceil(rt)+'s';
     const T=p;o.x=T.x;o.y=T.y;
   }
+  const myP=host?p:o,foP=host?o:p;
+  document.getElementById('hp1').style.width=Math.max(0,myP.hp)+'%';
+  document.getElementById('hp2').style.width=Math.max(0,foP.hp)+'%';
   draw();requestAnimationFrame(tick);
 }
+function feed(t,me){const d=document.createElement('div');d.innerHTML=(me?'<b class="text-emerald-300">YOU</b> ':'<b class="text-red-300">FOE</b> ')+t;
+const f=document.getElementById('feed');f.prepend(d);while(f.children.length>5)f.lastChild.remove();}
+function hitmark(x,y){shots.push({hx:x,hy:y,t:Date.now()});}
 function draw(){
   x.fillStyle='#02040a';x.fillRect(0,0,840,520);
   x.strokeStyle='rgba(52,211,153,.15)';x.lineWidth=1;
@@ -104,7 +122,10 @@ function draw(){
   x.strokeStyle='rgba(255,255,255,.2)';x.setLineDash([6,6]);x.beginPath();x.moveTo(420,0);x.lineTo(420,520);x.stroke();x.setLineDash([]);
   const meP=host?p:o,opP=host?o:p;
   dot(meP.x,meP.y,'#34d399',meP.hp);dot(opP.x,opP.y,'#f43f5e',opP.hp);
-  x.fillStyle='#fbbf24';shots.forEach(s=>{x.beginPath();x.arc(s.x,s.y,3,0,7);x.fill();});
+  x.fillStyle='#fbbf24';shots.forEach(s=>{
+    if(s.hx!==undefined){x.strokeStyle='#fff';x.lineWidth=2;const r=(Date.now()-s.t)/12;
+    x.beginPath();x.arc(s.hx,s.hy,r,0,7);x.stroke();x.lineWidth=1;return;}
+    x.beginPath();x.arc(s.x,s.y,3,0,7);x.fill();});
   x.strokeStyle='rgba(52,211,153,.4)';x.beginPath();x.moveTo(meP.x,meP.y);x.lineTo(mx,my);x.stroke();
 }
 function dot(px,py,c,hp){x.shadowBlur=14;x.shadowColor=c;x.fillStyle=c;x.beginPath();x.arc(px,py,11,0,7);x.fill();x.shadowBlur=0;
