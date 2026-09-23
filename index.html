@@ -73,7 +73,7 @@ function bootGame(key,name,customUrl,customCore){
   w.style.cssText=`left:${40+ZW*28}px;top:${30+ZW*24}px;width:min(640px,94vw);height:min(520px,72vh);z-index:${20+ZW}`;
   w.innerHTML=`<div class="wtitle flex items-center gap-2 px-3 py-2 text-xs font-semibold" style="background:rgba(255,255,255,.06)">
   <i data-lucide="${S.icon}" class="w-4 h-4" style="color:${S.color}"></i><span class="truncate">${name} — ${S.name}</span>
-  <span class="ml-auto flex gap-1.5"><button onclick="minWin('${id}')" class="w-7 h-6 rounded-md bg-white/10 grid place-items-center"><i data-lucide="minus" class="w-3 h-3 pointer-events-none"></i></button><button onclick="maxWin('${id}')" class="w-7 h-6 rounded-md bg-white/10 grid place-items-center"><i data-lucide="square" class="w-3 h-3 pointer-events-none"></i></button><button onclick="closeWin('${id}')" class="w-7 h-6 rounded-md bg-red-500/80 grid place-items-center"><i data-lucide="x" class="w-3 h-3 pointer-events-none"></i></button></span></div>
+  <span class="ml-auto flex gap-1.5"><button onclick="fsWin('${id}')" title="Fullscreen" class="w-7 h-6 rounded-md bg-white/10 grid place-items-center"><i data-lucide="maximize" class="w-3 h-3 pointer-events-none"></i></button><button onclick="minWin('${id}')" class="w-7 h-6 rounded-md bg-white/10 grid place-items-center"><i data-lucide="minus" class="w-3 h-3 pointer-events-none"></i></button><button onclick="maxWin('${id}')" class="w-7 h-6 rounded-md bg-white/10 grid place-items-center"><i data-lucide="square" class="w-3 h-3 pointer-events-none"></i></button><button onclick="closeWin('${id}')" class="w-7 h-6 rounded-md bg-red-500/80 grid place-items-center"><i data-lucide="x" class="w-3 h-3 pointer-events-none"></i></button></span></div>
   <div class="flex-1 bg-black relative" id="${id}body"></div>
   <div class="text-[10px] px-3 py-1 opacity-50">30 min free session • coins: <span class="c2">${coins}</span></div>`;
   wins.appendChild(w);tasks.innerHTML+=`<button id="t-${id}" onclick="focusWin('${id}')" class="tbtn text-xs bg-white/10 rounded-lg px-3 py-1.5 truncate max-w-[140px]">${name}</button>`;
@@ -84,6 +84,7 @@ function bootGame(key,name,customUrl,customCore){
   f.src=`emu.html?core=${S.core}&rom=${encodeURIComponent(romUrl)}&name=${encodeURIComponent(name)}`;
   body.appendChild(f);
 }
+function fsWin(id){const f=document.querySelector('#'+id+' iframe');if(!f)return;if(document.fullscreenElement)document.exitFullscreen();else if(f.requestFullscreen)f.requestFullscreen();}
 function focusWin(id){const w=document.getElementById(id);if(!w)return;w.style.display='flex';w.style.zIndex=++ZW+20;}
 function closeWin(id){document.getElementById(id)?.remove();document.getElementById('t-'+id)?.remove();}
 function minWin(id){document.getElementById(id).style.display='none';}
