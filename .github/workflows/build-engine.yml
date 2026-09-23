@@ -1,0 +1,24 @@
+name: Build Emulator Engine
+on:
+  workflow_dispatch:
+  push:
+    paths: ['engine-src-ref', '.github/workflows/build-engine.yml']
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Clone freej2me-web
+        run: git clone --depth 1 https://github.com/zb3/freej2me-web.git engine-src
+      - name: Build builder image
+        run: docker build --build-arg UID=$(id -u) -t f2m-builder engine-src/builder_image
+      - name: Build engine
+        run: docker run --rm -v $PWD/engine-src:/app -w /app f2m-builder ant
+      - name: Collect output
+        run: mkdir -p engine && cp -r engine-src/web/* engine/ && ls engine | head
+      - name: Commit engine
+        run: |
+          git config user.name "bot"; git config user.email "bot@local"
+          git add -f engine/
+          git commit -m "engine build" || echo "no changes"
+          git push origin main
