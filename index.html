@@ -19,6 +19,15 @@ h1,.sora{font-family:'Sora',sans-serif}
 <div id="boot"><div class="text-center"><i data-lucide="layout-grid" class="w-14 h-14 mx-auto mb-4"></i><div class="sora text-xl">VaultOS</div><div class="text-xs opacity-50 mt-2">loading retro systems…</div></div></div>
 <div id="desk" class="h-full pb-14 p-4 grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-1 content-start"></div>
 <div id="wins"></div>
+<div id="hub" class="hidden fixed inset-0 z-[60] flex-col justify-end" style="background:linear-gradient(180deg,rgba(5,8,18,.4),rgba(5,8,18,.92) 65%)">
+<div id="hubbg" class="absolute inset-0 -z-10 transition-all duration-500" style="background:radial-gradient(800px 400px at 70% 20%,rgba(168,85,247,.35),transparent)"></div>
+<div class="px-6 md:px-14 pt-14">
+<div id="hubsys" class="text-xs tracking-[.3em] opacity-60 mb-1">GBA</div>
+<h2 id="hubname" class="text-4xl md:text-6xl font-bold" style="font-family:'Sora'">Game</h2>
+<div id="hubcat" class="text-sm opacity-60 mt-1">Adventure</div>
+<div class="flex gap-3 mt-5"><button id="hubplay" class="bg-white text-slate-950 font-extrabold px-8 py-3 rounded-full text-sm">▶ Play Game</button><button onclick="hideHub()" class="bg-white/10 border border-white/15 px-8 py-3 rounded-full text-sm font-semibold">Back</button></div></div>
+<div class="px-6 md:px-14 mt-8 mb-2 text-xs opacity-50">Select with ← →, Enter to play, Esc to close</div>
+<div id="hubrow" class="flex gap-4 overflow-x-auto px-6 md:px-14 pb-10"></div></div>
 <div id="startmenu" class="hidden fixed bottom-16 left-1/2 -translate-x-1/2 w-[380px] max-w-[92vw] rounded-2xl border border-white/10 p-4 z-40">
 <div class="text-xs opacity-50 mb-2 px-2">Systems</div><div id="sapps" class="grid grid-cols-3 gap-1"></div>
 <div class="text-xs opacity-50 mt-3 mb-1 px-2">Games</div><div id="sgames" class="max-h-48 overflow-auto"></div>
@@ -57,9 +66,31 @@ desk.innerHTML=SYSTEMS.map(s=>`<div class="dicon" onclick="openSys('${s.id}')"><
 sapps.innerHTML=SYSTEMS.map(s=>`<button onclick="openSys('${s.id}')" class="sapp rounded-xl p-3 text-center"><i data-lucide="${s.icon}" class="w-7 h-7 mx-auto" style="color:${s.color}"></i><div class="text-[11px] mt-1">${s.name}</div></button>`).join('');
 lucide.createIcons();
 function upload(){up.click();up.onchange=e=>{const f=e.target.files[0];if(!f)return;openGame('custom',f.name,URL.createObjectURL(f),'gb');};}
-function openSys(id){const s=SYSTEMS.find(x=>x.id===id);
-sgames.innerHTML=s.games.map((g,i)=>`<button onclick="openGame('${id}:${i}','${g[0]}')" class="w-full text-left px-3 py-2 rounded-xl hover:bg-white/10 text-sm">${g[0]} <span class="opacity-50 text-xs">• ${g[1]}</span></button>`).join('')+`<div class="text-[11px] opacity-50 px-3 py-1">ROM links not set — upload your own, or add URLs in ROMS{}</div>`;
-startmenu.classList.remove('hidden');lucide.createIcons();}
+const HART=['🎮','🕹️','👾','🌟','🌀','🏎️','🗡️','💎','⚽','🐍'];
+let HUBSYS=null,HUBI=0;
+function openSys(id){showHub(id,0);}
+function showHub(id,i){
+  HUBSYS=SYSTEMS.find(x=>x.id===id);HUBI=i;
+  const hub=document.getElementById('hub');hub.classList.remove('hidden');hub.classList.add('flex');
+  const c=HUBSYS.color;
+  hubbg.style.background=`radial-gradient(800px 400px at 70% 20%,${c}55,transparent)`;
+  hubsys.innerText=HUBSYS.name+' • '+HUBSYS.games.length+' GAMES';
+  hubrow.innerHTML=HUBSYS.games.map((g,j)=>`<button onclick="hubSel(${j})" ondblclick="hubPlay()" id="hub-${j}" class="shrink-0 w-40 md:w-52 text-left rounded-2xl overflow-hidden border transition-all duration-200 ${j===i?'border-white scale-105 shadow-2xl':'border-white/10 opacity-60'}"><div class="h-40 md:h-56 grid place-items-center text-6xl" style="background:linear-gradient(150deg,${c},#0b1020)">${HART[(i+j)%HART.length]||'🎮'}</div><div class="p-2.5 bg-black/50 text-xs font-bold truncate">${g[0]}</div></button>`).join('');
+  hubSel(i);lucide.createIcons();
+}
+function hubSel(i){HUBI=(i+HUBSYS.games.length)%HUBSYS.games.length;
+  const g=HUBSYS.games[HUBI];hubname.innerText=g[0];hubcat.innerText=g[1]+' • '+HUBSYS.name;
+  [...hubrow.children].forEach((el,j)=>{el.className=`shrink-0 w-40 md:w-52 text-left rounded-2xl overflow-hidden border transition-all duration-200 ${j===HUBI?'border-white scale-105 shadow-2xl':'border-white/10 opacity-60'}`;});
+  hubrow.children[HUBI].scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'});
+  hubplay.onclick=()=>hubPlay();
+}
+function hubPlay(){const g=HUBSYS.games[HUBI];hideHub();openGame(HUBSYS.id+':'+HUBI,g[0]);}
+function hideHub(){const hub=document.getElementById('hub');hub.classList.add('hidden');hub.classList.remove('flex');}
+document.addEventListener('keydown',e=>{
+  if(document.getElementById('hub').classList.contains('hidden'))return;
+  if(e.key==='ArrowRight')hubSel(HUBI+1);if(e.key==='ArrowLeft')hubSel(HUBI-1);
+  if(e.key==='Enter')hubPlay();if(e.key==='Escape')hideHub();
+});
 function openGame(key,name,customUrl,customCore){
   startmenu.classList.add('hidden');
   adInterstitial(()=>bootGame(key,name,customUrl,customCore));
