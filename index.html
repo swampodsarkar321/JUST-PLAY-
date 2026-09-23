@@ -49,7 +49,7 @@ const ROMS={}; // 'gba:0':'https://.../emerald.gba' — ROM links ekhane
 let coins=+(localStorage.getItem('vo_coins')||100),ZW=0;
 setTimeout(()=>{boot.style.opacity=0;setTimeout(()=>boot.remove(),650);},1400);
 setInterval(()=>{clock.innerText=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});coinsEl();},1000);
-function coinsEl(){document.getElementById('coins').innerHTML='<i data-lucide=''coins'' class=''w-3 h-3''></i> '+coins;}
+function coinsEl(){document.getElementById('coins').innerText=coins;}
 desk.innerHTML=SYSTEMS.map(s=>`<div class="dicon" onclick="openSys('${s.id}')"><div class="mx-auto w-12 h-12 rounded-2xl grid place-items-center mb-1" style="background:${s.color}33;border:1px solid ${s.color}66"><i data-lucide="${s.icon}" class="w-6 h-6" style="color:${s.color}"></i></div><div class="text-[11px] font-semibold drop-shadow">${s.name}</div></div>`).join('')+`<div class="dicon" onclick="upload()"><div class="mx-auto w-12 h-12 rounded-2xl grid place-items-center mb-1 bg-white/10 border border-white/20"><i data-lucide="upload" class="w-6 h-6"></i></div><div class="text-[11px] font-semibold drop-shadow">My ROM</div></div><input id="up" type="file" class="hidden">`;
 sapps.innerHTML=SYSTEMS.map(s=>`<button onclick="openSys('${s.id}')" class="sapp rounded-xl p-3 text-center"><i data-lucide="${s.icon}" class="w-7 h-7 mx-auto" style="color:${s.color}"></i><div class="text-[11px] mt-1">${s.name}</div></button>`).join('');
 lucide.createIcons();
