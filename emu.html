@@ -1,0 +1,12 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>html,body{margin:0;height:100%;background:#000}#game canvas{max-width:100%}</style></head>
+<body><div id="game"></div>
+<script>
+const q=new URLSearchParams(location.search);
+window.EJS_player='#game';
+window.EJS_core=q.get('core')||'gba';
+window.EJS_gameName=q.get('name')||'game';
+window.EJS_gameUrl=q.get('rom');
+window.EJS_pathtodata='https://cdn.emulatorjs.com/stable/data/';
+</script>
+<script src="https://cdn.emulatorjs.com/stable/data/loader.js"></script>
+</body></html>
