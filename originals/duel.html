@@ -1,0 +1,119 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Neon Duel — 1v1 Esports</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<style>body{background:#05070f;font-family:sans-serif}canvas{background:#02040a}</style></head>
+<body class="text-white min-h-screen">
+<div id="menu" class="min-h-screen grid place-items-center p-4">
+<div class="w-full max-w-[400px] rounded-3xl border border-white/10 bg-white/[.03] p-8 space-y-4 text-center">
+<h1 class="text-3xl font-black">NEON <span class="text-emerald-300">DUEL</span></h1>
+<p class="text-xs opacity-60">1v1 arena • 3 rounds • ELO ranked</p>
+<div class="text-sm">Your ELO: <b id="elo">1000</b> <span class="opacity-50" id="rank"></span></div>
+<input id="room" placeholder="Room code (e.g. DHK42)" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-center tracking-widest outline-none">
+<div class="grid grid-cols-2 gap-2"><button onclick="play(true)" class="bg-emerald-400 text-slate-950 font-extrabold py-3 rounded-xl text-sm">CREATE</button><button onclick="play(false)" class="bg-white/10 border border-white/15 font-bold py-3 rounded-xl text-sm">JOIN</button></div>
+<p class="text-[11px] opacity-40">WASD move • Mouse aim • Click shoot • First to 5 or timer wins round</p></div></div>
+<div id="game" class="hidden min-h-screen flex-col items-center p-3 gap-2">
+<div class="w-full max-w-[860px] flex items-center gap-3 text-sm">
+<span id="hud" class="font-bold">0 : 0</span><span id="rtimer" class="opacity-70 tabular-nums">60</span>
+<span id="ping" class="opacity-50 text-xs ml-auto">-- ms</span>
+<button onclick="quit()" class="text-xs bg-red-500/20 text-red-300 px-3 py-1.5 rounded-lg">Quit</button></div>
+<canvas id="c" width="840" height="520" class="w-full max-w-[860px] rounded-2xl border border-emerald-400/20"></canvas>
+<div id="msg" class="text-sm font-bold h-6"></div></div>
+<script>
+firebase.initializeApp({databaseURL:"https://fram-and-go-default-rtdb.asia-southeast1.firebasedatabase.app"});
+const db=firebase.database();
+const cv=document.getElementById('c'),x=cv.getContext('2d');
+let elo=+(localStorage.getItem('nd_elo')||1000);
+document.getElementById('elo').innerText=elo;
+document.getElementById('rank').innerText=elo<1100?'(Bronze)':elo<1300?'(Silver)':elo<1500?'(Gold)':'(Diamond)';
+let me=null,room=null,host=false,opp=null,mx=0,my=0,shoot=false,over=false;
+let p={x:100,y:260,hp:100},o={x:740,y:260,hp:100},shots=[],os=[],score=[0,0],rt=60,round=1,lastT=0;
+const K={};
+document.addEventListener('keydown',e=>K[e.key.toLowerCase()]=true);
+document.addEventListener('keyup',e=>K[e.key.toLowerCase()]=false);
+cv.addEventListener('mousemove',e=>{const r=cv.getBoundingClientRect();mx=(e.clientX-r.left)*(840/r.width);my=(e.clientY-r.top)*(520/r.height);});
+cv.addEventListener('mousedown',()=>shoot=true);cv.addEventListener('mouseup',()=>shoot=false);
+async function play(h){
+  room=(document.getElementById('room').value||'').trim().toUpperCase();
+  if(room.length<3)return alert('Room code den');
+  host=h;me='p'+Math.random().toString(36).slice(2,7);
+  menu.classList.add('hidden');game.classList.remove('hidden');game.classList.add('flex');
+  const rp=db.ref('duel/'+room);
+  if(host){p={x:100,y:260,hp:100};o={x:740,y:260,hp:100};score=[0,0];rt=60;round=1;
+    await rp.set({host:me,state:{p,o,score,rt,round},t:Date.now()});}
+  rp.child('state').on('value',s=>{const v=s.val();if(!v)return;
+    if(host){o=v.o;}else{p=v.p;o=v.o;score=v.score;rt=v.rt;round=v.round;}});
+  rp.child('guest').on('value',s=>{opp=s.val();});
+  if(!host)await rp.child('guest').set(me);
+  setInterval(net,100);requestAnimationFrame(tick);
+}
+let lastPing=Date.now();
+async function net(){
+  if(over)return;
+  const rp=db.ref('duel/'+room);
+  if(host){await rp.child('state').update({p,o:o,score,rt,round});}
+  else{await rp.child('guestState').set({...o,t:Date.now()});}
+  lastPing=Date.now();
+}
+db.ref().constructor;
+setInterval(async()=>{
+  if(!room||!host)return;
+  const g=await db.ref('duel/'+room+'/guestState').once('value');const v=g.val();
+  if(v&&Date.now()-v.t<2000){o.x=v.x;o.y=v.y;o.hp=v.hp;}
+  const gs=await db.ref('duel/'+room+'/gshots').once('value');const gj=gs.val()||{};
+  Object.entries(gj).forEach(([k,s])=>{shots.push({x:s.x,y:s.y,a:s.a});db.ref('duel/'+room+'/gshots/'+k).remove();});
+  document.getElementById('ping').innerText=(v?Math.max(0,Date.now()-v.t):999)+' ms';
+},300);
+function tick(t){
+  if(over)return;
+  const dt=Math.min(50,t-lastT||16);lastT=t;const k=dt/16.6;
+  const S=host?p:o;
+  if(K['w'])S.y-=3*k;if(K['s'])S.y+=3*k;if(K['a'])S.x-=3*k;if(K['d'])S.x+=3*k;
+  S.x=Math.max(15,Math.min(825,S.x));S.y=Math.max(15,Math.min(505,S.y));
+  if(shoot&&t-(S.cd||0)>220){S.cd=t;const s={x:S.x,y:S.y,a:Math.atan2(my-S.y,mx-S.x)};shots.push({...s,me:true});shoot=false;
+    if(!host)db.ref('duel/'+room+'/gshots').push(s);}
+  shots=shots.filter(s=>{s.x+=Math.cos(s.a)*9*k;s.y+=Math.sin(s.a)*9*k;
+    const T=host?o:p;
+    if(Math.hypot(s.x-T.x,s.y-T.y)<14){T.hp-=12;shots.push();return false;}
+    return s.x>0&&s.x<840&&s.y>0&&s.y<520;});
+  if(host){
+    rt-=dt/1000;
+    const deadP=p.hp<=0,deadO=o.hp<=0;
+    if(deadP||deadO||rt<=0){
+      if(deadO||(!deadP&&p.hp>o.hp))score[0]++;else score[1]++;
+      document.getElementById('msg').innerText=`Round ${round} — ${score[0]} : ${score[1]}`;
+      if(score[0]>=2||score[1]>=2)return end(score[0]>score[1]);
+      p={x:100,y:260,hp:100};o={x:740,y:260,hp:100};rt=60;round++;
+      setTimeout(()=>document.getElementById('msg').innerText='',2000);
+    }
+    document.getElementById('hud').innerText=`${score[0]} : ${score[1]} • R${round}`;
+    document.getElementById('rtimer').innerText=Math.ceil(rt)+'s';
+  }else{
+    document.getElementById('hud').innerText=`${score[0]} : ${score[1]} • R${round}`;
+    document.getElementById('rtimer').innerText=Math.ceil(rt)+'s';
+    const T=p;o.x=T.x;o.y=T.y;
+  }
+  draw();requestAnimationFrame(tick);
+}
+function draw(){
+  x.fillStyle='#02040a';x.fillRect(0,0,840,520);
+  x.strokeStyle='rgba(52,211,153,.15)';x.lineWidth=1;
+  for(let i=0;i<840;i+=40){x.beginPath();x.moveTo(i,0);x.lineTo(i,520);x.stroke();}
+  for(let i=0;i<520;i+=40){x.beginPath();x.moveTo(0,i);x.lineTo(840,i);x.stroke();}
+  x.strokeStyle='rgba(255,255,255,.2)';x.setLineDash([6,6]);x.beginPath();x.moveTo(420,0);x.lineTo(420,520);x.stroke();x.setLineDash([]);
+  const meP=host?p:o,opP=host?o:p;
+  dot(meP.x,meP.y,'#34d399',meP.hp);dot(opP.x,opP.y,'#f43f5e',opP.hp);
+  x.fillStyle='#fbbf24';shots.forEach(s=>{x.beginPath();x.arc(s.x,s.y,3,0,7);x.fill();});
+  x.strokeStyle='rgba(52,211,153,.4)';x.beginPath();x.moveTo(meP.x,meP.y);x.lineTo(mx,my);x.stroke();
+}
+function dot(px,py,c,hp){x.shadowBlur=14;x.shadowColor=c;x.fillStyle=c;x.beginPath();x.arc(px,py,11,0,7);x.fill();x.shadowBlur=0;
+  x.fillStyle='rgba(255,255,255,.15)';x.fillRect(px-14,py-20,28,5);x.fillStyle=c;x.fillRect(px-14,py-20,28*Math.max(0,hp)/100,5);}
+function end(win){
+  over=true;
+  const d=win?16:-16;elo=Math.max(800,elo+d);localStorage.setItem('nd_elo',elo);
+  db.ref('duelboard').push({elo,win,ts:Date.now()});
+  document.getElementById('msg').innerText=(win?'VICTORY +16 ELO':'DEFEAT -16 ELO')+` • New ELO ${elo}`;
+}
+function quit(){location.reload();}
+</script></body></html>
