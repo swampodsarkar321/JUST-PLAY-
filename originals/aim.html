@@ -1,0 +1,62 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bullseye — Aim Trainer</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>body{background:#05070f;font-family:sans-serif;cursor:crosshair}canvas{background:radial-gradient(circle at 50% 40%,#0b1226,#02040a)}</style></head>
+<body class="text-white min-h-screen">
+<div class="max-w-[860px] mx-auto p-3 space-y-2">
+<div class="flex items-center gap-3 text-sm">
+<a href="../index.html" class="opacity-60">← VaultOS</a><b>BULLSEYE</b>
+<span class="ml-auto">Score <b id="sc">0</b></span><span>Best <b id="best">0</b></span>
+<span id="tm" class="bg-sky-500/15 border border-sky-500/30 rounded-full px-3 py-1 tabular-nums">30</span>
+<span class="bg-amber-400/10 border border-amber-400/30 rounded-full px-3 py-1">🪙 <b id="coins">0</b></span></div>
+<canvas id="c" width="840" height="520" class="w-full rounded-2xl border border-red-400/20"></canvas>
+<div class="flex gap-2 justify-center text-xs">
+<button onclick="mode='easy';start()" class="px-4 py-2 rounded-xl bg-white/10">Easy</button>
+<button onclick="mode='pro';start()" class="px-4 py-2 rounded-xl bg-white/10">Pro</button>
+<button onclick="mode='flick';start()" class="px-4 py-2 rounded-xl bg-red-400 text-slate-950 font-bold">Flick (esports)</button></div>
+<p class="text-[11px] opacity-40 text-center">Click targets fast • miss = -5 • 500 pts = +10 coins</p></div>
+<script>
+const cv=document.getElementById('c'),x=cv.getContext('2d');
+let sc=0,mode='easy',t=null,left=30,over=true,combo=0;
+let coins=+(localStorage.getItem('vo_coins')||100),best=+(localStorage.getItem('bl_best')||0);
+bestEl();coinsEl();
+function bestEl(){best.innerText=best;}function coinsEl(){document.getElementById('coins').innerText=coins;}
+function size(){return mode==='easy'?34:mode==='pro'?24:16;}
+function life(){return mode==='easy'?1100:mode==='pro'?800:550;}
+function spawn(){
+  if(over)return;
+  t={x:40+Math.random()*760,y:40+Math.random()*440,r:size(),born:Date.now(),life:life()};
+  setTimeout(()=>{if(t&&Date.now()-t.born>t.life){t=null;combo=0;}},t.life+30);
+}
+function start(){sc=0;left=30;over=false;combo=0;document.getElementById('sc').innerText=0;spawn();
+  const iv=setInterval(()=>{left--;document.getElementById('tm').innerText=left;
+    if(left<=0){clearInterval(iv);over=true;t=null;
+      if(sc>best){best=sc;localStorage.setItem('bl_best',best);bestEl();}
+      alert('Time! Score '+sc);}},1000);}
+cv.addEventListener('mousedown',e=>{
+  if(over)return;
+  const r=cv.getBoundingClientRect(),mx=(e.clientX-r.left)*(840/r.width),my=(e.clientY-r.top)*(520/r.height);
+  if(t&&Math.hypot(mx-t.x,my-t.y)<t.r){
+    const speed=Math.max(0,1-(Date.now()-t.born)/t.life);
+    const pts=Math.round((50+speed*100)*(1+combo*0.1));sc+=pts;combo++;
+    document.getElementById('sc').innerText=sc;
+    if(sc%500<pts){coins+=10;localStorage.setItem('vo_coins',coins);coinsEl();}
+    t=null;spawn();
+  }else{sc=Math.max(0,sc-5);combo=0;document.getElementById('sc').innerText=sc;}
+});
+(function draw(){
+  x.fillStyle='#02040a';x.fillRect(0,0,840,520);
+  x.strokeStyle='rgba(255,255,255,.05)';
+  for(let i=0;i<840;i+=42){x.beginPath();x.moveTo(i,0);x.lineTo(i,520);x.stroke();}
+  for(let i=0;i<520;i+=42){x.beginPath();x.moveTo(0,i);x.lineTo(840,i);x.stroke();}
+  if(t&&!over){const p=1-(Date.now()-t.born)/t.life;
+    x.globalAlpha=Math.max(.25,p);
+    x.fillStyle='#f43f5e';x.beginPath();x.arc(t.x,t.y,t.r,0,7);x.fill();
+    x.fillStyle='#fff';x.beginPath();x.arc(t.x,t.y,t.r*0.62,0,7);x.fill();
+    x.fillStyle='#f43f5e';x.beginPath();x.arc(t.x,t.y,t.r*0.3,0,7);x.fill();
+    x.globalAlpha=1;
+    x.strokeStyle='#34d399';x.lineWidth=3;x.beginPath();x.arc(t.x,t.y,t.r+6,-1.57,-1.57+p*6.28);x.stroke();x.lineWidth=1;}
+  if(over&&sc===0){x.fillStyle='rgba(255,255,255,.5)';x.font='20px sans-serif';x.textAlign='center';x.fillText('Pick a mode to start',420,260);}
+  requestAnimationFrame(draw);
+})();
+</script></body></html>
