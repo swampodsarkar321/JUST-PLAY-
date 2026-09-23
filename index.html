@@ -21,10 +21,22 @@ h1,.sora{font-family:'Sora',sans-serif}
 <div id="startmenu" class="hidden fixed bottom-16 left-1/2 -translate-x-1/2 w-[380px] max-w-[92vw] rounded-2xl border border-white/10 p-4 z-40">
 <div class="text-xs opacity-50 mb-2 px-2">Systems</div><div id="sapps" class="grid grid-cols-3 gap-1"></div>
 <div class="text-xs opacity-50 mt-3 mb-1 px-2">Games</div><div id="sgames" class="max-h-48 overflow-auto"></div></div>
-<div id="taskbar" class="fixed bottom-0 inset-x-0 h-14 flex items-center gap-1 px-3 border-t border-white/10 z-40">
-<button onclick="document.getElementById('startmenu').classList.toggle('hidden')" class="tbtn rounded-xl px-4 py-2 text-sm font-bold">▦ Start</button>
-<div id="tasks" class="flex gap-1 overflow-auto"></div>
-<div class="ml-auto flex items-center gap-3 text-xs"><span id="coins" class="bg-amber-400/15 border border-amber-400/30 rounded-full px-3 py-1">🪙 100</span><span id="clock" class="opacity-80 tabular-nums">--:--</span></div></div>
+<div id="taskbar" class="fixed bottom-0 inset-x-0 h-[52px] flex items-center px-3 border-t border-white/10 z-40">
+<div class="flex-1"></div>
+<div class="flex items-center gap-1">
+<button onclick="document.getElementById('startmenu').classList.toggle('hidden')" class="tbtn rounded-xl p-2" title="Start"><span class="grid place-items-center w-8 h-8 rounded-lg" style="background:linear-gradient(135deg,#38bdf8,#818cf8)">▦</span></button>
+<button onclick="showDesk()" class="tbtn rounded-xl p-2" title="Vault"><span class="text-xl">🎮</span></button>
+<div id="tasks" class="flex gap-1 max-w-[30vw] overflow-auto"></div>
+</div>
+<div class="flex-1 flex justify-end items-center gap-3 text-xs">
+<button onclick="showDesk()" class="tbtn rounded-lg px-2 py-1 opacity-70" title="Show desktop">▢</button>
+<span class="opacity-70">📶 🔊 🔋</span>
+<span id="clock" class="opacity-90 tabular-nums text-right leading-tight">--:--</span>
+<span class="bg-amber-400/15 border border-amber-400/30 rounded-full px-3 py-1">🪙 <span id="coins">100</span></span></div></div>
+<div id="ctx" class="hidden fixed z-50 bg-[#1c2438]/95 border border-white/10 rounded-xl p-1.5 text-sm w-52 backdrop-blur-xl">
+<button onclick="location.reload()" class="w-full text-left px-3 py-2 rounded-lg hover:bg-white/10">↻ Refresh</button>
+<button onclick="nextWall();hideCtx()" class="w-full text-left px-3 py-2 rounded-lg hover:bg-white/10">🖼️ Next background</button>
+<button onclick="openSys('gba');hideCtx()" class="w-full text-left px-3 py-2 rounded-lg hover:bg-white/10">🎮 Open GBA</button></div>
 <script>
 const SYSTEMS=[
 {id:'gba',name:'GBA',icon:'🎮',core:'gba',color:'#a855f7',games:[['Pokemon Emerald','RPG'],['Mario Kart SC','Racing'],['Zelda Minish Cap','Adventure'],['Metroid Fusion','Action']]},
@@ -51,9 +63,9 @@ function openGame(key,name,customUrl,customCore){
   const id='w'+(++ZW);
   const w=document.createElement('div');w.id=id;w.className='win';
   w.style.cssText=`left:${40+ZW*28}px;top:${30+ZW*24}px;width:min(640px,94vw);height:min(520px,72vh);z-index:${20+ZW}`;
-  w.innerHTML=`<div class="wtitle flex items-center gap-2 px-3 py-2 text-xs font-semibold" style="background:${S.color}33">
+  w.innerHTML=`<div class="wtitle flex items-center gap-2 px-3 py-2 text-xs font-semibold" style="background:rgba(255,255,255,.06)">
   <span>${S.icon}</span><span class="truncate">${name} — ${S.name}</span>
-  <button onclick="document.getElementById('${id}').remove()" class="ml-auto w-6 h-6 rounded-md bg-red-500/80 text-xs">✕</button></div>
+  <span class="ml-auto flex gap-1.5"><button onclick="minWin('${id}')" class="w-7 h-6 rounded-md bg-white/10 text-xs">–</button><button onclick="maxWin('${id}')" class="w-7 h-6 rounded-md bg-white/10 text-xs">▢</button><button onclick="closeWin('${id}')" class="w-7 h-6 rounded-md bg-red-500/80 text-xs">✕</button></span></div>
   <div class="flex-1 bg-black relative" id="${id}body"></div>
   <div class="text-[10px] px-3 py-1 opacity-50">30 min free session • coins: <span class="c2">${coins}</span></div>`;
   wins.appendChild(w);tasks.innerHTML+=`<button id="t-${id}" onclick="focusWin('${id}')" class="tbtn text-xs bg-white/10 rounded-lg px-3 py-1.5 truncate max-w-[140px]">${name}</button>`;
@@ -64,7 +76,15 @@ function openGame(key,name,customUrl,customCore){
   f.src=`emu.html?core=${S.core}&rom=${encodeURIComponent(romUrl)}&name=${encodeURIComponent(name)}`;
   body.appendChild(f);
 }
-function focusWin(id){const w=document.getElementById(id);w.style.zIndex=++ZW+20;}
+function focusWin(id){const w=document.getElementById(id);if(!w)return;w.style.display='flex';w.style.zIndex=++ZW+20;}
+function closeWin(id){document.getElementById(id)?.remove();document.getElementById('t-'+id)?.remove();}
+function minWin(id){document.getElementById(id).style.display='none';}
+function maxWin(id){const w=document.getElementById(id);if(w.dataset.max){delete w.dataset.max;w.style.cssText=w._old||'';}else{w._old=w.style.cssText;w.dataset.max=1;w.style.cssText=`left:0;top:0;width:100vw;height:calc(100vh - 52px);z-index:${++ZW+20};border-radius:0`;}}
+function showDesk(){document.querySelectorAll('.win').forEach(w=>w.style.display='none');}
+function hideCtx(){document.getElementById('ctx').classList.add('hidden');}
+const WALLS=['https://images.unsplash.com/photo-1620121692029-d088224ddc74?w=1600&q=60','https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1600&q=60','https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=1600&q=60'];let WI=0;
+function nextWall(){WI=(WI+1)%WALLS.length;document.body.style.backgroundImage=`url('${WALLS[WI]}')`;}
+document.addEventListener('contextmenu',e=>{if(e.target.closest('.win'))return;e.preventDefault();const c=document.getElementById('ctx');c.classList.remove('hidden');c.style.left=Math.min(e.clientX,innerWidth-220)+'px';c.style.top=Math.min(e.clientY,innerHeight-160)+'px';});
 function drag(el){const h=el.querySelector('.wtitle');let x,y;h.onpointerdown=e=>{x=e.clientX-el.offsetLeft;y=e.clientY-el.offsetTop;h.setPointerCapture(e.pointerId);h.onpointermove=ev=>{el.style.left=Math.max(0,ev.clientX-x)+'px';el.style.top=Math.max(0,ev.clientY-y)+'px';};h.onpointerup=()=>h.onpointermove=null;};}
 document.addEventListener('click',e=>{if(!e.target.closest('#startmenu')&&!e.target.closest('#taskbar'))startmenu.classList.add('hidden');});
 </script></body></html>
