@@ -21,7 +21,9 @@ h1,.sora{font-family:'Sora',sans-serif}
 <div id="wins"></div>
 <div id="startmenu" class="hidden fixed bottom-16 left-1/2 -translate-x-1/2 w-[380px] max-w-[92vw] rounded-2xl border border-white/10 p-4 z-40">
 <div class="text-xs opacity-50 mb-2 px-2">Systems</div><div id="sapps" class="grid grid-cols-3 gap-1"></div>
-<div class="text-xs opacity-50 mt-3 mb-1 px-2">Games</div><div id="sgames" class="max-h-48 overflow-auto"></div></div>
+<div class="text-xs opacity-50 mt-3 mb-1 px-2">Games</div><div id="sgames" class="max-h-48 overflow-auto"></div>
+<div id="menuad" class="mt-2 rounded-xl border border-dashed border-white/15 text-center text-[11px] opacity-50 py-2.5">AD SLOT</div>
+<button onclick="adRewarded(()=>{coins+=50;localStorage.setItem('vo_coins',coins);coinsEl();})" class="mt-2 w-full rounded-xl py-2 text-xs font-bold text-slate-950" style="background:linear-gradient(135deg,#fbbf24,#f59e0b)">Watch ad • +50 coins</button></div>
 <div id="taskbar" class="fixed bottom-0 inset-x-0 h-[52px] flex items-center px-3 border-t border-white/10 z-40">
 <div class="flex-1"></div>
 <div class="flex items-center gap-1">
@@ -38,6 +40,7 @@ h1,.sora{font-family:'Sora',sans-serif}
 <button onclick="location.reload()" class="w-full text-left px-3 py-2 rounded-lg hover:bg-white/10">Refresh</button>
 <button onclick="nextWall();hideCtx()" class="w-full text-left px-3 py-2 rounded-lg hover:bg-white/10">Next background</button>
 <button onclick="openSys('gba');hideCtx()" class="w-full text-left px-3 py-2 rounded-lg hover:bg-white/10">Open GBA</button></div>
+<script src="ads.js"></script>
 <script>
 const SYSTEMS=[
 {id:'gba',name:'GBA',icon:'gamepad-2',core:'gba',color:'#a855f7',games:[['Pokemon Emerald','RPG'],['Mario Kart SC','Racing'],['Zelda Minish Cap','Adventure'],['Metroid Fusion','Action']]},
@@ -59,6 +62,9 @@ sgames.innerHTML=s.games.map((g,i)=>`<button onclick="openGame('${id}:${i}','${g
 startmenu.classList.remove('hidden');lucide.createIcons();}
 function openGame(key,name,customUrl,customCore){
   startmenu.classList.add('hidden');
+  adInterstitial(()=>bootGame(key,name,customUrl,customCore));
+}
+function bootGame(key,name,customUrl,customCore){
   const [sys,gi]=key.includes(':')?key.split(':'):[customCore||'gba',-1];
   const S=SYSTEMS.find(x=>x.id==sys)||SYSTEMS[0];
   const romUrl=customUrl||ROMS[key];
