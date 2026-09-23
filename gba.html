@@ -1,0 +1,35 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GBA Arena — Nokia Vault</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Sora:wght@700;800&display=swap">
+<style>body{font-family:'Inter',sans-serif;background:#05070f}h1,h2{font-family:'Sora',sans-serif}
+.gcard{transition:transform .18s ease,box-shadow .18s ease}.gcard:hover{transform:translateY(-6px) scale(1.02);box-shadow:0 20px 50px rgba(139,92,246,.3)}</style></head>
+<body class="text-slate-100 min-h-screen">
+<header class="flex items-center gap-3 px-4 md:px-8 py-4 sticky top-0 z-40 bg-black/50 backdrop-blur-xl border-b border-white/5">
+<a href="index.html" class="text-sm opacity-70">← Vault</a>
+<div class="w-10 h-10 rounded-2xl grid place-items-center font-black text-slate-950" style="background:linear-gradient(135deg,#a855f7,#22d3ee)">G</div>
+<div><h1 class="leading-none font-bold">GBA Arena</h1><div class="text-[9px] tracking-[.3em] text-violet-300/70">32-BIT CLASSICS</div></div>
+<div class="ml-auto flex items-center gap-2 text-sm bg-amber-400/10 border border-amber-400/30 rounded-full px-4 py-1.5">🪙 <b id="coins">0</b></div></header>
+<!-- Ad slot: top banner (paste AdSense code in ADS.md) -->
+<div class="max-w-6xl mx-auto px-4 mt-3"><div id="ad-top" class="rounded-2xl border border-dashed border-white/15 text-center text-xs opacity-50 py-4">AD • 970×250 banner slot</div></div>
+<main class="p-4 md:p-8 max-w-6xl mx-auto space-y-6">
+<section class="rounded-[2rem] p-8 relative overflow-hidden" style="background:linear-gradient(130deg,#6d28d9,#0e7490)">
+<h2 class="text-3xl md:text-5xl font-bold">32-bit legends.<br>Zero install.</h2>
+<p class="opacity-70 mt-2 text-sm">Pokemon, Mario Kart, Zelda — browser e. 30 min free, tarpor ad dekhe coin.</p></section>
+<section><h2 class="text-xl font-bold mb-3">Top GBA Picks</h2><div id="grid" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div></section>
+<section class="rounded-3xl p-6 border border-dashed border-white/15"><h2 class="font-bold mb-1">📥 Your own .gba ROM</h2><p class="text-xs opacity-60 mb-3">Stays in your browser.</p><input id="up" type="file" accept=".gba,.zip" class="text-sm"></section>
+</main>
+<script>
+const G=[
+{name:'Pokemon Emerald',cat:'RPG',art:'⚡',g:['#22d3ee','#34d399'],rom:''},
+{name:'Mario Kart SC',cat:'Racing',art:'🏎️',g:['#f43f5e','#f59e0b'],rom:''},
+{name:'Zelda Minish Cap',cat:'Adventure',art:'🗡️',g:['#34d399','#a3e635'],rom:''},
+{name:'Metroid Fusion',cat:'Action',art:'🚀',g:['#f59e0b','#ef4444'],rom:''},
+{name:'Fire Emblem',cat:'Strategy',art:'🛡️',g:['#8b5cf6','#ec4899'],rom:''},
+{name:'WarioWare',cat:'Party',art:'🤪',g:['#eab308','#f97316'],rom:''},
+{name:'Golden Sun',cat:'RPG',art:'☀️',g:['#fbbf24','#f43f5e'],rom:''},
+{name:'Advance Wars',cat:'Strategy',art:'🎖️',g:['#22d3ee','#6366f1'],rom:''}];
+grid.innerHTML=G.map((x,i)=>`<a href="gba-play.html?g=${i}" class="gcard rounded-2xl overflow-hidden border border-white/10 bg-white/[.03]"><div class="h-28 grid place-items-center text-5xl" style="background:linear-gradient(135deg,${x.g[0]},${x.g[1]})">${x.art}</div><div class="p-3"><b class="text-sm">${x.name}</b><div class="text-[11px] opacity-50">${x.cat} • GBA</div></div></a>`).join('');
+let coins=+(localStorage.getItem('jv_coins')||100);document.getElementById('coins').innerText=coins;
+document.getElementById('up').onchange=e=>{const f=e.target.files[0];if(!f)return;sessionStorage.setItem('jv_gba',URL.createObjectURL(f));sessionStorage.setItem('jv_gba_name',f.name);location.href='gba-play.html?custom=1';};
+</script></body></html>
