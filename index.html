@@ -1,132 +1,106 @@
 ﻿<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>VaultOS — Retro Gaming OS</title>
+<title>VaultStation 5</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
 <style>html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif}
-body{background:url('https://images.unsplash.com/photo-1620121692029-d088224ddc74?w=1600&q=60') center/cover,#0b1020}
-h1,.sora{font-family:'Sora',sans-serif}
-#boot{position:fixed;inset:0;z-index:100;background:#000;display:grid;place-items:center;transition:opacity .6s}
-.dicon{width:92px;padding:10px 4px;border-radius:12px;text-align:center;cursor:pointer;border:1px solid transparent}
-.dicon:hover{background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.2)}
-.win{position:absolute;background:rgba(20,26,43,.96);border:1px solid rgba(255,255,255,.12);border-radius:14px;box-shadow:0 30px 80px rgba(0,0,0,.6);display:flex;flex-direction:column;overflow:hidden;backdrop-filter:blur(20px)}
-.wtitle{cursor:move;user-select:none}
-#taskbar{backdrop-filter:blur(24px);background:rgba(20,26,43,.8)}
-.tbtn:hover{background:rgba(255,255,255,.12)}
-#startmenu{backdrop-filter:blur(24px);background:rgba(20,26,43,.92)}
-.sapp:hover{background:rgba(255,255,255,.1)}</style></head>
-<body class="text-white">
-<div id="boot"><div class="text-center"><i data-lucide="layout-grid" class="w-14 h-14 mx-auto mb-4"></i><div class="sora text-xl">VaultOS</div><div class="text-xs opacity-50 mt-2">loading retro systems…</div></div></div>
-<div id="desk" class="h-full pb-14 p-4 grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-1 content-start"></div>
-<div id="wins"></div>
-<div id="hub" class="hidden fixed inset-0 z-[60] flex-col justify-end" style="background:linear-gradient(180deg,rgba(5,8,18,.4),rgba(5,8,18,.92) 65%)">
-<div id="hubbg" class="absolute inset-0 -z-10 transition-all duration-500" style="background:radial-gradient(800px 400px at 70% 20%,rgba(168,85,247,.35),transparent)"></div>
-<div class="px-6 md:px-14 pt-14">
-<div id="hubsys" class="text-xs tracking-[.3em] opacity-60 mb-1">GBA</div>
-<h2 id="hubname" class="text-4xl md:text-6xl font-bold" style="font-family:'Sora'">Game</h2>
-<div id="hubcat" class="text-sm opacity-60 mt-1">Adventure</div>
-<div class="flex gap-3 mt-5"><button id="hubplay" class="bg-white text-slate-950 font-extrabold px-8 py-3 rounded-full text-sm">▶ Play Game</button><button onclick="hideHub()" class="bg-white/10 border border-white/15 px-8 py-3 rounded-full text-sm font-semibold">Back</button></div></div>
-<div class="px-6 md:px-14 mt-8 mb-2 text-xs opacity-50">Select with ← →, Enter to play, Esc to close</div>
-<div id="hubrow" class="flex gap-4 overflow-x-auto px-6 md:px-14 pb-10"></div></div>
-<div id="startmenu" class="hidden fixed bottom-16 left-1/2 -translate-x-1/2 w-[380px] max-w-[92vw] rounded-2xl border border-white/10 p-4 z-40">
-<div class="text-xs opacity-50 mb-2 px-2">Systems</div><div id="sapps" class="grid grid-cols-3 gap-1"></div>
-<div class="text-xs opacity-50 mt-3 mb-1 px-2">Games</div><div id="sgames" class="max-h-48 overflow-auto"></div>
-<div id="menuad" class="mt-2 rounded-xl border border-dashed border-white/15 text-center text-[11px] opacity-50 py-2.5">AD SLOT</div>
-<button onclick="adRewarded(()=>{coins+=50;localStorage.setItem('vo_coins',coins);coinsEl();})" class="mt-2 w-full rounded-xl py-2 text-xs font-bold text-slate-950" style="background:linear-gradient(135deg,#fbbf24,#f59e0b)">Watch ad • +50 coins</button></div>
-<div id="taskbar" class="fixed bottom-0 inset-x-0 h-[52px] flex items-center px-3 border-t border-white/10 z-40">
-<div class="flex-1"></div>
-<div class="flex items-center gap-1">
-<button onclick="toggleStart()" class="tbtn rounded-xl p-2" title="Start"><span class="grid place-items-center w-8 h-8 rounded-lg" style="background:linear-gradient(135deg,#38bdf8,#818cf8)"><i data-lucide="layout-grid" class="w-4 h-4 text-slate-950"></i></span></button>
-<button onclick="showDesk()" class="tbtn rounded-xl p-2" title="Vault"><i data-lucide="gamepad-2" class="w-5 h-5"></i></button>
-<div id="tasks" class="flex gap-1 max-w-[30vw] overflow-auto"></div>
-</div>
-<div class="flex-1 flex justify-end items-center gap-3 text-xs">
-<button onclick="showDesk()" class="tbtn rounded-lg px-2 py-1 opacity-70" title="Show desktop"><i data-lucide="minus-square" class="w-4 h-4"></i></button>
-<span class="opacity-70 flex gap-2"><i data-lucide="wifi" class="w-4 h-4"></i><i data-lucide="volume-2" class="w-4 h-4"></i><i data-lucide="battery-medium" class="w-4 h-4"></i></span>
-<span id="clock" class="opacity-90 tabular-nums text-right leading-tight">--:--</span>
-<span class="bg-amber-400/15 border border-amber-400/30 rounded-full px-3 py-1 flex items-center gap-1.5"><i data-lucide="coins" class="w-3.5 h-3.5"></i><span id="coins">100</span></span></div></div>
-<div id="ctx" class="hidden fixed z-50 bg-[#1c2438]/95 border border-white/10 rounded-xl p-1.5 text-sm w-52 backdrop-blur-xl">
-<button onclick="location.reload()" class="w-full text-left px-3 py-2 rounded-lg hover:bg-white/10">Refresh</button>
-<button onclick="nextWall();hideCtx()" class="w-full text-left px-3 py-2 rounded-lg hover:bg-white/10">Next background</button>
-<button onclick="openSys('gba');hideCtx()" class="w-full text-left px-3 py-2 rounded-lg hover:bg-white/10">Open GBA</button></div>
+body{background:#0b0e1a}
+#bg{position:fixed;inset:0;transition:background 1s;background:radial-gradient(900px 500px at 70% 15%,rgba(0,112,209,.35),transparent),radial-gradient(700px 500px at 20% 90%,rgba(120,40,180,.25),transparent)}
+#boot{position:fixed;inset:0;z-index:100;background:#000;display:grid;place-items:center;transition:opacity .8s}
+.hrow{scrollbar-width:none}.hrow::-webkit-scrollbar{display:none}
+.tile{transition:transform .18s ease,box-shadow .18s ease,border-color .18s}
+.tile.sel{transform:scale(1.12);border-color:#fff;box-shadow:0 12px 50px rgba(255,255,255,.25)}
+#cc{backdrop-filter:blur(30px);background:rgba(10,14,28,.75)}
+.ccbtn:hover{background:rgba(255,255,255,.14)}
+#player{backdrop-filter:blur(10px)}</style></head>
+<body class="text-white" onload="lucide.createIcons()">
+<div id="bg"></div>
+<div id="boot"><div class="text-center"><div class="text-5xl font-light tracking-tight">VaultStation<span class="align-super text-lg">®5</span></div><div class="text-xs opacity-50 mt-3">press anything…</div></div></div>
+<!-- top bar -->
+<div class="fixed top-0 inset-x-0 z-30 flex items-center gap-5 px-6 md:px-12 py-4">
+<div class="flex items-center gap-2"><span class="w-8 h-8 rounded-full grid place-items-center font-bold text-slate-950" style="background:linear-gradient(135deg,#fff,#9db4d0)">V</span></div>
+<div class="flex gap-6 text-sm ml-4"><button class="font-bold border-b-2 border-white pb-0.5">Games</button><button class="opacity-60 hover:opacity-100" onclick="tabMedia()">Media</button></div>
+<div class="ml-auto flex items-center gap-5 text-sm">
+<button onclick="adRewarded(()=>{coins+=50;saveCoins();toast('+50 coins');})" class="flex items-center gap-1.5 opacity-80 hover:opacity-100"><i data-lucide="coins" class="w-4 h-4"></i><b id="coins">100</b></button>
+<button class="opacity-80 hover:opacity-100"><i data-lucide="search" class="w-5 h-5"></i></button>
+<button class="opacity-80 hover:opacity-100"><i data-lucide="settings" class="w-5 h-5"></i></button>
+<span id="clock" class="tabular-nums opacity-90">--:--</span></div></div>
+<!-- home -->
+<div id="home" class="relative z-10 h-full flex flex-col justify-center px-6 md:px-12 pt-10">
+<div class="text-xs tracking-[.25em] opacity-60 mb-1" id="sysname">GBA</div>
+<h1 id="gname" class="text-4xl md:text-6xl font-bold mb-5">Game</h1>
+<div id="row" class="hrow flex gap-4 overflow-x-auto pb-4 pt-6 -mt-6"></div>
+<div class="flex gap-8 mt-6 text-sm opacity-80">
+<div class="flex items-center gap-2"><span class="w-7 h-7 rounded-full border border-white/40 grid place-items-center text-xs">✕</span> Play</div>
+<div class="flex items-center gap-2"><span class="w-7 h-7 rounded-full border border-white/40 grid place-items-center text-xs">◯</span> Details</div>
+<div class="flex items-center gap-2"><i data-lucide="gamepad-2" class="w-5 h-5"></i> PS Button: Control Center</div></div></div>
+<!-- fullscreen player -->
+<div id="player" class="hidden fixed inset-0 z-40 bg-black/95 flex-col">
+<div class="flex items-center gap-3 px-4 py-2.5 text-sm border-b border-white/10">
+<button onclick="home()" class="flex items-center gap-1.5 opacity-80 hover:opacity-100"><i data-lucide="chevron-left" class="w-4 h-4"></i><span id="pname">Game</span></button>
+<span id="ptimer" class="ml-auto text-xs bg-sky-500/15 border border-sky-500/30 rounded-full px-3 py-1">30:00</span>
+<button onclick="toggleCC()" class="flex items-center gap-1.5 bg-white/10 hover:bg-white/20 rounded-full px-4 py-1.5 text-xs font-bold"><i data-lucide="gamepad-2" class="w-4 h-4"></i>PS</button></div>
+<div class="flex-1 relative"><iframe id="emu" class="absolute inset-0 w-full h-full border-0" allow="autoplay;fullscreen"></iframe></div></div>
+<!-- control center -->
+<div id="cc" class="hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-50 rounded-2xl border border-white/10 px-3 py-2.5 flex items-center gap-1.5">
+<button onclick="toggleCC()" class="ccbtn rounded-xl px-4 py-2 text-xs">Resume</button>
+<button onclick="fsEmu()" class="ccbtn rounded-xl px-4 py-2 text-xs">Fullscreen</button>
+<button onclick="adRewarded(()=>{coins+=50;saveCoins();toast('+50 coins');})" class="ccbtn rounded-xl px-4 py-2 text-xs">+50 coins (ad)</button>
+<button onclick="home()" class="ccbtn rounded-xl px-4 py-2 text-xs text-red-300">Quit game</button></div>
+<div id="toast" class="hidden fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-white text-slate-950 text-sm font-bold px-5 py-2.5 rounded-full"></div>
 <script src="ads.js"></script>
 <script>
-const SYSTEMS=[
-{id:'gba',name:'GBA',icon:'gamepad-2',core:'gba',color:'#a855f7',games:[['Pokemon Emerald','RPG'],['Mario Kart SC','Racing'],['Zelda Minish Cap','Adventure'],['Metroid Fusion','Action']]},
-{id:'gbc',name:'Game Boy',icon:'joystick',core:'gb',color:'#22d3ee',games:[['Pokemon Crystal','RPG'],['Zelda Links Awakening','Adventure'],['Tetris','Puzzle'],['Mario Land 2','Platformer']]},
-{id:'nes',name:'NES',icon:'ghost',core:'nes',color:'#ef4444',games:[['Mario Bros 3','Platformer'],['Contra','Action'],['Zelda','Adventure'],['Tetris','Puzzle']]},
-{id:'snes',name:'SNES',icon:'star',core:'snes',color:'#f59e0b',games:[['Mario World','Platformer'],['Zelda LTTP','Adventure'],['Donkey Kong','Platformer'],['Street Fighter','Fighting']]},
-{id:'gen',name:'Genesis',icon:'orbit',core:'segaMD',color:'#34d399',games:[['Sonic 2','Platformer'],['Streets of Rage','Action'],['Mortal Kombat','Fighting'],['Aladdin','Platformer']]}];
-const ROMS={}; // 'gba:0':'https://.../emerald.gba' — ROM links ekhane
-let coins=+(localStorage.getItem('vo_coins')||100),ZW=0;
-setTimeout(()=>{boot.style.opacity=0;setTimeout(()=>boot.remove(),650);},1400);
-setInterval(()=>{clock.innerText=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});coinsEl();},1000);
-function coinsEl(){document.getElementById('coins').innerText=coins;}
-desk.innerHTML=SYSTEMS.map(s=>`<div class="dicon" onclick="openSys('${s.id}')"><div class="mx-auto w-12 h-12 rounded-2xl grid place-items-center mb-1" style="background:${s.color}33;border:1px solid ${s.color}66"><i data-lucide="${s.icon}" class="w-6 h-6" style="color:${s.color}"></i></div><div class="text-[11px] font-semibold drop-shadow">${s.name}</div></div>`).join('')+`<div class="dicon" onclick="upload()"><div class="mx-auto w-12 h-12 rounded-2xl grid place-items-center mb-1 bg-white/10 border border-white/20"><i data-lucide="upload" class="w-6 h-6"></i></div><div class="text-[11px] font-semibold drop-shadow">My ROM</div></div><input id="up" type="file" class="hidden">`;
-sapps.innerHTML=SYSTEMS.map(s=>`<button onclick="openSys('${s.id}')" class="sapp rounded-xl p-3 text-center"><i data-lucide="${s.icon}" class="w-7 h-7 mx-auto" style="color:${s.color}"></i><div class="text-[11px] mt-1">${s.name}</div></button>`).join('');
-lucide.createIcons();
-function upload(){up.click();up.onchange=e=>{const f=e.target.files[0];if(!f)return;openGame('custom',f.name,URL.createObjectURL(f),'gb');};}
-const HART=['🎮','🕹️','👾','🌟','🌀','🏎️','🗡️','💎','⚽','🐍'];
-let HUBSYS=null,HUBI=0;
-function openSys(id){showHub(id,0);}
-function showHub(id,i){
-  HUBSYS=SYSTEMS.find(x=>x.id===id);HUBI=i;
-  const hub=document.getElementById('hub');hub.classList.remove('hidden');hub.classList.add('flex');
-  const c=HUBSYS.color;
-  hubbg.style.background=`radial-gradient(800px 400px at 70% 20%,${c}55,transparent)`;
-  hubsys.innerText=HUBSYS.name+' • '+HUBSYS.games.length+' GAMES';
-  hubrow.innerHTML=HUBSYS.games.map((g,j)=>`<button onclick="hubSel(${j})" ondblclick="hubPlay()" id="hub-${j}" class="shrink-0 w-40 md:w-52 text-left rounded-2xl overflow-hidden border transition-all duration-200 ${j===i?'border-white scale-105 shadow-2xl':'border-white/10 opacity-60'}"><div class="h-40 md:h-56 grid place-items-center text-6xl" style="background:linear-gradient(150deg,${c},#0b1020)">${HART[(i+j)%HART.length]||'🎮'}</div><div class="p-2.5 bg-black/50 text-xs font-bold truncate">${g[0]}</div></button>`).join('');
-  hubSel(i);lucide.createIcons();
+const SYS={
+gba:{name:'GBA',color:'#7c3aed',games:[['Pokemon Emerald','RPG'],['Mario Kart SC','Racing'],['Zelda Minish Cap','Adventure'],['Metroid Fusion','Action']]},
+gbc:{name:'GAME BOY',color:'#06b6d4',games:[['Pokemon Crystal','RPG'],['Zelda LA','Adventure'],['Tetris','Puzzle'],['Mario Land 2','Platformer']]},
+nes:{name:'NES',color:'#ef4444',games:[['Mario Bros 3','Platformer'],['Contra','Action'],['Zelda','Adventure'],['Tetris','Puzzle']]},
+snes:{name:'SUPER NES',color:'#f59e0b',games:[['Mario World','Platformer'],['Zelda LTTP','Adventure'],['Donkey Kong','Platformer'],['SF II','Fighting']]},
+gen:{name:'GENESIS',color:'#10b981',games:[['Sonic 2','Platformer'],['Streets of Rage','Action'],['MK','Fighting'],['Aladdin','Platformer']]}};
+const ROMS={};
+const ARTS=['⚡','🏎️','🗡️','🚀','💎','🐍','⚽','🌟','🌀','👾'];
+let coins=+(localStorage.getItem('vo_coins')||100),SI=0,GI=0,SECS=30*60;
+const SIDS=Object.keys(SYS);
+function saveCoins(){localStorage.setItem('vo_coins',coins);document.getElementById('coins').innerText=coins;}
+function toast(t){const e=document.getElementById('toast');e.innerText=t;e.classList.remove('hidden');setTimeout(()=>e.classList.add('hidden'),2200);}
+setTimeout(()=>{boot.style.opacity=0;setTimeout(()=>boot.remove(),850);},1600);
+setInterval(()=>{clock.innerText=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});},1000);
+saveCoins();draw();
+function tiles(){const s=SYS[SIDS[SI]];return s.games.map((g,i)=>({sys:SIDS[SI],i,name:g[0],cat:g[1],color:s.color}));}
+function draw(){
+  const s=SYS[SIDS[SI]];
+  bg.style.background=`radial-gradient(900px 500px at 70% 15%,${s.color}55,transparent),radial-gradient(700px 500px at 20% 90%,rgba(120,40,180,.25),transparent)`;
+  sysname.innerText=s.name;
+  const T=tiles(),cur=T[GI]||T[0];GI=T.indexOf(cur);if(GI<0)GI=0;
+  gname.innerText=T[GI]?T[GI].name:'';
+  row.innerHTML=T.map((t,i)=>`<button onclick="sel(${i})" ondblclick="play()" id="t${i}" class="tile shrink-0 w-36 md:w-48 text-left rounded-2xl overflow-hidden border-2 ${i===GI?'sel border-white':'border-transparent opacity-70'}"><div class="h-36 md:h-48 grid place-items-center text-6xl" style="background:linear-gradient(150deg,${t.color},#0b1020)">${ARTS[(SI*4+i)%ARTS.length]}</div><div class="p-2 bg-black/60 text-xs font-bold truncate">${t.name}</div></button>`).join('')
+  +`<button onclick="upload()" class="tile shrink-0 w-36 md:w-48 rounded-2xl border-2 border-dashed border-white/25 grid place-items-center h-[228px] md:h-[276px] opacity-70"><span class="text-center text-xs">+<br>My ROM</span></button>`;
+  const el=document.getElementById('t'+GI);if(el)el.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'});
 }
-function hubSel(i){HUBI=(i+HUBSYS.games.length)%HUBSYS.games.length;
-  const g=HUBSYS.games[HUBI];hubname.innerText=g[0];hubcat.innerText=g[1]+' • '+HUBSYS.name;
-  [...hubrow.children].forEach((el,j)=>{el.className=`shrink-0 w-40 md:w-52 text-left rounded-2xl overflow-hidden border transition-all duration-200 ${j===HUBI?'border-white scale-105 shadow-2xl':'border-white/10 opacity-60'}`;});
-  hubrow.children[HUBI].scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'});
-  hubplay.onclick=()=>hubPlay();
+function sel(i){GI=i;draw();}
+function tabMedia(){toast('Media gallery coming soon');}
+function upload(){const inp=document.createElement('input');inp.type='file';inp.onchange=e=>{const f=e.target.files[0];if(f)playCustom(f.name,URL.createObjectURL(f));};inp.click();}
+function playCustom(name,url){const p=document.getElementById('player');p.classList.remove('hidden');p.classList.add('flex');pname.innerText=name;emu.src=`emu.html?core=gba&rom=${encodeURIComponent(url)}&name=${encodeURIComponent(name)}`;SECS=30*60;}
+function play(){
+  const T=tiles(),t=T[GI];if(!t)return;
+  const key=t.sys+':'+t.i,rom=ROMS[key];
+  const p=document.getElementById('player');p.classList.remove('hidden');p.classList.add('flex');pname.innerText=t.name;
+  if(!rom){emu.removeAttribute('src');emu.contentWindow?.document?.open();emu.contentWindow?.document?.write(`<body style="background:#000;color:#fff;font-family:sans-serif;display:grid;place-items:center;height:100vh"><div style="text-align:center">No ROM linked.<br>Upload your own file to play ${t.name}.</div>`);emu.contentWindow?.document?.close();return;}
+  emu.src=`emu.html?core=${SYS[t.sys].core||t.sys}&rom=${encodeURIComponent(rom)}&name=${encodeURIComponent(t.name)}`;
+  SECS=30*60;
 }
-function hubPlay(){const g=HUBSYS.games[HUBI];hideHub();openGame(HUBSYS.id+':'+HUBI,g[0]);}
-function hideHub(){const hub=document.getElementById('hub');hub.classList.add('hidden');hub.classList.remove('flex');}
+function home(){const p=document.getElementById('player');p.classList.add('hidden');p.classList.remove('flex');emu.removeAttribute('src');cc.classList.add('hidden');}
+function toggleCC(){cc.classList.toggle('hidden');}
+function fsEmu(){const f=document.getElementById('emu');if(document.fullscreenElement)document.exitFullscreen();else f.requestFullscreen&&f.requestFullscreen();}
+setInterval(()=>{if(player.classList.contains('hidden'))return;
+  if(SECS>0){SECS--;const m=String(Math.floor(SECS/60)).padStart(2,'0'),s=String(SECS%60).padStart(2,'0');ptimer.innerText=`${m}:${s}`;}
+  else ptimer.innerText='Coins play';},1000);
 document.addEventListener('keydown',e=>{
-  if(document.getElementById('hub').classList.contains('hidden'))return;
-  if(e.key==='ArrowRight')hubSel(HUBI+1);if(e.key==='ArrowLeft')hubSel(HUBI-1);
-  if(e.key==='Enter')hubPlay();if(e.key==='Escape')hideHub();
+  if(!player.classList.contains('hidden')){if(e.key==='Escape')toggleCC();return;}
+  if(e.key==='ArrowRight'){const T=tiles();GI=(GI+1)%T.length;draw();}
+  if(e.key==='ArrowLeft'){const T=tiles();GI=(GI-1+T.length)%T.length;draw();}
+  if(e.key==='ArrowDown'){SI=(SI+1)%SIDS.length;GI=0;draw();}
+  if(e.key==='ArrowUp'){SI=(SI-1+SIDS.length)%SIDS.length;GI=0;draw();}
+  if(e.key==='Enter')play();
 });
-function openGame(key,name,customUrl,customCore){
-  startmenu.classList.add('hidden');
-  adInterstitial(()=>bootGame(key,name,customUrl,customCore));
-}
-function bootGame(key,name,customUrl,customCore){
-  const [sys,gi]=key.includes(':')?key.split(':'):[customCore||'gba',-1];
-  const S=SYSTEMS.find(x=>x.id==sys)||SYSTEMS[0];
-  const romUrl=customUrl||ROMS[key];
-  const id='w'+(++ZW);
-  const w=document.createElement('div');w.id=id;w.className='win';
-  w.style.cssText=`left:${40+ZW*28}px;top:${30+ZW*24}px;width:min(640px,94vw);height:min(520px,72vh);z-index:${20+ZW}`;
-  w.innerHTML=`<div class="wtitle flex items-center gap-2 px-3 py-2 text-xs font-semibold" style="background:rgba(255,255,255,.06)">
-  <i data-lucide="${S.icon}" class="w-4 h-4" style="color:${S.color}"></i><span class="truncate">${name} — ${S.name}</span>
-  <span class="ml-auto flex gap-1.5"><button onclick="fsWin('${id}')" title="Fullscreen" class="w-7 h-6 rounded-md bg-white/10 grid place-items-center"><i data-lucide="maximize" class="w-3 h-3 pointer-events-none"></i></button><button onclick="minWin('${id}')" class="w-7 h-6 rounded-md bg-white/10 grid place-items-center"><i data-lucide="minus" class="w-3 h-3 pointer-events-none"></i></button><button onclick="maxWin('${id}')" class="w-7 h-6 rounded-md bg-white/10 grid place-items-center"><i data-lucide="square" class="w-3 h-3 pointer-events-none"></i></button><button onclick="closeWin('${id}')" class="w-7 h-6 rounded-md bg-red-500/80 grid place-items-center"><i data-lucide="x" class="w-3 h-3 pointer-events-none"></i></button></span></div>
-  <div class="flex-1 bg-black relative" id="${id}body"></div>
-  <div class="text-[10px] px-3 py-1 opacity-50">30 min free session • coins: <span class="c2">${coins}</span></div>`;
-  wins.appendChild(w);tasks.innerHTML+=`<button id="t-${id}" onclick="focusWin('${id}')" class="tbtn text-xs bg-white/10 rounded-lg px-3 py-1.5 truncate max-w-[140px]">${name}</button>`;
-  lucide.createIcons();drag(w);
-  const body=document.getElementById(id+'body');
-  if(!romUrl){body.innerHTML=`<div class="grid place-items-center h-full text-center text-sm opacity-70 p-6">No ROM linked.<br>Upload your own file, or add URL in <b>ROMS['${key}']</b>.</div>`;return;}
-  const f=document.createElement('iframe');f.className='w-full h-full border-0';
-  f.src=`emu.html?core=${S.core}&rom=${encodeURIComponent(romUrl)}&name=${encodeURIComponent(name)}`;
-  body.appendChild(f);
-}
-function fsWin(id){const f=document.querySelector('#'+id+' iframe');if(!f)return;if(document.fullscreenElement)document.exitFullscreen();else if(f.requestFullscreen)f.requestFullscreen();}
-function focusWin(id){const w=document.getElementById(id);if(!w)return;w.style.display='flex';w.style.zIndex=++ZW+20;}
-function closeWin(id){document.getElementById(id)?.remove();document.getElementById('t-'+id)?.remove();}
-function minWin(id){document.getElementById(id).style.display='none';}
-function maxWin(id){const w=document.getElementById(id);if(w.dataset.max){delete w.dataset.max;w.style.cssText=w._old||'';}else{w._old=w.style.cssText;w.dataset.max=1;w.style.cssText=`left:0;top:0;width:100vw;height:calc(100vh - 52px);z-index:${++ZW+20};border-radius:0`;}}
-function showDesk(){document.querySelectorAll('.win').forEach(w=>w.style.display='none');}
-function hideCtx(){document.getElementById('ctx').classList.add('hidden');}
-const WALLS=['https://images.unsplash.com/photo-1620121692029-d088224ddc74?w=1600&q=60','https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1600&q=60','https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=1600&q=60'];let WI=0;
-function nextWall(){WI=(WI+1)%WALLS.length;document.body.style.backgroundImage=`url('${WALLS[WI]}')`;}
-document.addEventListener('contextmenu',e=>{if(e.target.closest('.win'))return;e.preventDefault();const c=document.getElementById('ctx');c.classList.remove('hidden');c.style.left=Math.min(e.clientX,innerWidth-220)+'px';c.style.top=Math.min(e.clientY,innerHeight-160)+'px';});
-function drag(el){const h=el.querySelector('.wtitle');let x,y;h.onpointerdown=e=>{if(e.target.closest('button'))return;x=e.clientX-el.offsetLeft;y=e.clientY-el.offsetTop;h.setPointerCapture(e.pointerId);h.onpointermove=ev=>{el.style.left=Math.max(0,ev.clientX-x)+'px';el.style.top=Math.max(0,ev.clientY-y)+'px';};h.onpointerup=()=>h.onpointermove=null;};}
-function toggleStart(){document.getElementById('startmenu').classList.toggle('hidden');lucide.createIcons();}
-lucide.createIcons();
-document.addEventListener('click',e=>{if(!e.target.closest('#startmenu')&&!e.target.closest('#taskbar'))startmenu.classList.add('hidden');});
+document.addEventListener('pointerdown',()=>{const b=document.getElementById('boot');if(b){b.style.opacity=0;setTimeout(()=>b.remove(),850);}});
 </script></body></html>
